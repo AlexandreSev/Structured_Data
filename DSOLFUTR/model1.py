@@ -59,10 +59,9 @@ class first_model():
 			self.train_steps.append(tf.train.AdamOptimizer(learning_rate).minimize(self.true_probas[k]))
 		
 
-	def train_step(self, x, target):
-		for k in range(23):
-			with tf.Session() as sess:
-				feed_dict = {self.cnn.x: x, self.target: target}
+	def train_step(self, x, target, sess):
+			for k in range(23):
+				feed_dict = {self.cnn.x: x, self.target[k]: target[:, k, :]}
 				sess.run(self.train_steps[k], feed_dict=feed_dict)
 
 if __name__== '__main__':
