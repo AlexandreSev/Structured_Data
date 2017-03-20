@@ -8,7 +8,7 @@ import numpy as np
 from .convolution_part import convolutional_part
 
 def weight_variable(shape):
-	initial = tf.truncated_normal(shape, stddev=0.1)
+	initial = tf.truncated_normal(shape, stddev=0.01)
 	return tf.Variable(initial)
 
 def bias_variable(shape):
@@ -21,13 +21,14 @@ class first_model():
 	"""
 	"""
 
-	def __init__(self, input_shape=(None, 32, 32, 3), learning_rate=1e-4):
+	def __init__(self, input_shape=(None, 32, 32, 1), learning_rate=1e-4):
 		
 		self.cnn = convolutional_part(input_shape)
 
 		self.W = np.array([weight_variable((4096, 37)) for _ in range(23)])
 		self.b = np.array([bias_variable([37]) for _ in range(23)])
 		self.input = tf.reshape(self.cnn.maxpool3, [-1, 4096])
+
 		self.output = np.array([tf.nn.softmax(tf.matmul(self.input, self.W[k]) + self.b[k], dim=-1) 
 								for k in range(23)])
 		self.target = np.array([tf.placeholder(tf.float32, shape=(None, 37)) 
@@ -36,33 +37,32 @@ class first_model():
 		self.create_train(learning_rate=learning_rate)
 	
 
-	def predict(self, x, all_k=True, onek=0):
+	def predict(self, x, sess, all_k=True, onek=0):
 		if not all_k:
-			with tf.Session() as sess:
-				sess.run(tf.global_variables_initializer())
-				feed_dict = {self.cnn.x: x}
-				return sess.run(self.output[onek], feed_dict=feed_dict)
+			feed_dict = {self.cnn.x: x}
+			return sess.run(self.output[onek], feed_dict=feed_dict)
 		else:
 			predicted = np.zeros((x.shape[0], 23, 37))
-			with tf.Session() as sess:
-				for k in range(23):
-					sess.run(tf.global_variables_initializer())
-					feed_dict = {self.cnn.x: x}
-					predicted[:, k, :] = sess.run(self.output[k], feed_dict=feed_dict)
+			for k in range(23):
+				feed_dict = {self.cnn.x: x}
+				predicted[:, k, :] = sess.run(self.output[k], feed_dict=feed_dict)
 			return np.argmax(predicted, axis=-1)
 
 	def create_train(self, learning_rate=0.001):
 		self.train_steps = []
 		self.true_probas = []
 		for k in range(23):
-			self.true_probas.append(tf.reduce_sum(- tf.multiply(self.output[k], self.target[k])))
+			self.true_probas.append(tf.reduce_sum(- tf.log(tf.reduce_sum(tf.multiply(self.output[k], self.target[k]), axis=1))))
 			self.train_steps.append(tf.train.AdamOptimizer(learning_rate).minimize(self.true_probas[k]))
 		
 
 	def train_step(self, x, target, sess):
-			for k in range(23):
-				feed_dict = {self.cnn.x: x, self.target[k]: target[:, k, :]}
-				sess.run(self.train_steps[k], feed_dict=feed_dict)
+		loss_score = 0
+		for k in range(23):
+			feed_dict = {self.cnn.x: x, self.target[k]: target[:, k, :]}
+			loss_score += (sess.run(tf.reduce_sum(- tf.log(tf.reduce_sum(tf.multiply(self.output[k], self.target[k]), axis=1))), feed_dict=feed_dict))
+			sess.run(self.train_steps[k], feed_dict=feed_dict)
+		print("Loss: %s"%loss_score)
 
 if __name__== '__main__':
 	a = first_model()

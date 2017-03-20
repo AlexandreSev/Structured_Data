@@ -6,8 +6,6 @@ import numpy as np
 import tensorflow as tf
 import matplotlib.pyplot as plt
 
-data = pd.read_csv(pjoin(training_directory, "word.csv"), sep=";", encoding="utf8", index_col=0)
-
 
 def weight_variable(shape):
     initial = tf.truncated_normal(shape, stddev=0.1)
@@ -27,10 +25,10 @@ def max_pool_2x2(x):
 
 class convolutional_part():
 
-	def __init__(self, input_shape=(None, 32, 32, 3)):
+	def __init__(self, input_shape=(None, 32, 32, 1)):
 		self.x = tf.placeholder(tf.float32, shape=input_shape, name="input")
 
-		self.W_conv1 = weight_variable([7, 7, 3, 64])
+		self.W_conv1 = weight_variable([7, 7, 1, 64])
 		self.b_conv1 = bias_variable([64])
 
 		self.conv_1 = conv2d(self.x, self.W_conv1) + self.b_conv1
@@ -58,7 +56,7 @@ class convolutional_part():
 
 			
 if __name__ == "__main__":
-	test = np.load(pjoin(training_directory, "test.npy")).reshape(1, 32, 32, 3)
+	test = np.load(pjoin(training_directory, "test.npy")).reshape(1, 32, 32, 1)
 	model = convolutional_part()
 	print(model.predict(test))
 	

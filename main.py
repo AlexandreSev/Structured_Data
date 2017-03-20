@@ -22,7 +22,7 @@ for file_name, target in zip(folder1.file, folder1.tag):
 	temp_name = file_name.split(".")
 	temp_name = "".join(temp_name[:-1] + ["_reshaped.npy"])
 	if firststep:
-		list_file = np.load(pjoin(training_directory, temp_name)).reshape((1, 32, 32, 3))
+		list_file = np.load(pjoin(training_directory, temp_name)).reshape((1, 32, 32, 1))
 		temp = list(target)
 		temp = [dict_conversion[char.lower()] for char in temp 
 				if char.lower() in "abcdefghijklmnopqrstuvwxyz0123456789"]
@@ -32,7 +32,7 @@ for file_name, target in zip(folder1.file, folder1.tag):
 		firststep = False
 	else:
 		list_file = np.vstack((list_file, 
-					np.load(pjoin(training_directory, temp_name)).reshape((1, 32, 32, 3))))
+					np.load(pjoin(training_directory, temp_name)).reshape((1, 32, 32, 1))))
 		temp = list(target)
 		temp = [dict_conversion[char.lower()] for char in temp 
 				if char.lower() in "abcdefghijklmnopqrstuvwxyz0123456789"]
@@ -40,29 +40,31 @@ for file_name, target in zip(folder1.file, folder1.tag):
 			temp.append(36)
 		list_target.append(temp)
 
-model = first_model(learning_rate=1e-4)
-
-prediction = model.predict(list_file)
-print(np.mean(prediction == np.array(list_target)))
-
-one_hot_target = np.array([[np.eye(37)[i] for i in l] for l in list_target])
-
-saver = tf.train.Saver()
-
 with tf.Session() as sess:
+	model = first_model(learning_rate=1e-4)
 	sess.run(tf.global_variables_initializer())
-	for i in range(100):
+
+	prediction = model.predict(list_file, sess)
+	print(np.mean(prediction == np.array(list_target)))
+
+	one_hot_target = np.array([[np.eye(37)[i] for i in l] for l in list_target])
+	saver = tf.train.Saver()
+
+	if False:
+		saver.restore(sess, "./model.ckpt")
+		print("Model Loaded.")
+	else:
+		sess.run(tf.global_variables_initializer())
+	for i in range(1, 1000):
 		model.train_step(list_file, one_hot_target, sess)
-		if i % 10 == 0:
-			print(strftime("%H:%M:%S", gmtime())+" Epoch: %r"%i)
-			prediction = model.predict(list_file)
-			print("score: "+str(np.mean(prediction == np.array(list_target))))
+		print(strftime("%H:%M:%S", gmtime())+" Epoch: %r"%i)
+		if i % 1 == 0:
+			prediction = model.predict(list_file, sess)
+			print("accuracy: "+str(np.mean(prediction == np.array(list_target))))
 
 	save_path = saver.save(sess, "./model.ckpt")
 	print("Model saved in file: %s" % save_path)
 	# https://www.tensorflow.org/programmers_guide/variables#restoring_variables
 
-with tf.Session() as sess:
-	saver.restore(sess, "./model.ckpt")
-	print("Model Loaded.")
+
 
