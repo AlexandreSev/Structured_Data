@@ -5,6 +5,8 @@
 import tensorflow as tf
 import numpy as np
 
+from .convolution_part import convolutional_part
+
 def weight_variable(shape):
 	initial = tf.truncated_normal(shape, stddev=0.1)
 	return tf.Variable(initial)
@@ -19,39 +21,50 @@ class first_model():
 	"""
 	"""
 
-	def __init__(self, input_shape=(None, 4, 4, 256)):
+	def __init__(self, input_shape=(None, 32, 32, 3)):
+		
+		self.cnn = convolutional_part(input_shape)
+
 		self.W = np.array([weight_variable((4096, 37)) for _ in range(23)])
 		self.b = np.array([bias_variable([37]) for _ in range(23)])
-		self.input = tf.placeholder(tf.float32, shape=input_shape)
-		self.reshapeinput = tf.reshape(self.input, [-1, 4096], name="blabl")
-		# print(tf.shape(self.input))
-		# with tf.Session() as sess:
-		# 	batch_size = sess.run(tf.shape(self.input))[0]
-		# self.output = np.empty((batch_size, 23, 37)) # None => dim qui peut varier, -1 c'est la dimension qui convient 
-		self.output = np.array([tf.nn.softmax(tf.matmul(self.reshapeinput, self.W[k]) + self.b[k], dim=-1) for k in range(23)])
-		# for k in range(23): #W.shape[2]
-		# 	self.output[:,k,:] = tf.nn.softmax(tf.matmul(self.input, self.W[k]) + self.b[k], dim=0)
-			#output[k,:,:] = self.input.dot(self.W[:,:,k])
-			# tf.nn.softmax(tf.matmul(A, W) , dim=0)
+		self.input = tf.reshape(self.cnn.maxpool3, [-1, 4096])
+		self.output = np.array([tf.nn.softmax(tf.matmul(self.input, self.W[k]) + self.b[k], dim=-1) 
+								for k in range(23)])
+		self.target = np.array([tf.placeholder(tf.float32, shape=(None, 37)) 
+								for k in range(23)])
+
+		self.create_train()
 	
 
-	def predict(self, input):
-		with tf.Session() as sess:
-			sess.run(tf.global_variables_initializer())
-			feed_dict = {self.input: input}
-			return sess.run(self.output[0], feed_dict=feed_dict)
+	def predict(self, x, all_k=True, onek=0):
+		if not all_k:
+			with tf.Session() as sess:
+				sess.run(tf.global_variables_initializer())
+				feed_dict = {self.cnn.x: x}
+				return sess.run(self.output[onek], feed_dict=feed_dict)
+		else:
+			predicted = np.zeros((x.shape[0], 23, 37))
+			with tf.Session() as sess:
+				for k in range(23):
+					sess.run(tf.global_variables_initializer())
+					feed_dict = {self.cnn.x: x}
+					predicted[:, k, :] = sess.run(self.output[k], feed_dict=feed_dict)
+			return np.argmax(predicted, axis=-1)
 
-	def create_one_layer(self, position, input):
-		"""
-		"""
-		with tf.Session() as sess:
-			tf.nn.softmax(logits, dim=-1, name=None) 
-			return 
+	def create_train(self, learning_rate=0.001):
+		self.train_steps = []
+		self.true_probas = []
+		for k in range(23):
+			self.true_probas.append(tf.reduce_sum(- tf.multiply(self.output[k], self.target[k])))
+			self.train_steps.append(tf.train.AdamOptimizer(learning_rate).minimize(self.true_probas[k]))
+		
+
+	def train_step(self, x, target):
+		for k in range(23):
+			with tf.Session() as sess:
+				feed_dict = {self.cnn.x: x, self.target: target}
+				sess.run(self.train_steps[k], feed_dict=feed_dict)
 
 if __name__== '__main__':
 	a = first_model()
 	test = np.load('test.npy').reshape(1,32,32,3)
-	from convolution_part import *
-	model = convolutional_part()
-	b = model.predict(test)
-	print(a.predict(b).sum())
