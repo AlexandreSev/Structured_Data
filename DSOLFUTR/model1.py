@@ -21,7 +21,7 @@ class first_model():
 	"""
 	"""
 
-	def __init__(self, input_shape=(None, 32, 32, 3)):
+	def __init__(self, input_shape=(None, 32, 32, 3), learning_rate=1e-4):
 		
 		self.cnn = convolutional_part(input_shape)
 
@@ -33,7 +33,7 @@ class first_model():
 		self.target = np.array([tf.placeholder(tf.float32, shape=(None, 37)) 
 								for k in range(23)])
 
-		self.create_train()
+		self.create_train(learning_rate=learning_rate)
 	
 
 	def predict(self, x, all_k=True, onek=0):
