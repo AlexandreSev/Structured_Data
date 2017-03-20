@@ -5,6 +5,7 @@ import pandas as pd
 from DSOLFUTR.settings import training_directory
 from os.path import join as pjoin
 from DSOLFUTR.model1 import first_model
+import tensorflow as tf
 
 data = pd.read_csv(pjoin(training_directory, "word.csv"), sep=";", encoding="utf8", 
 	index_col=0)
@@ -36,7 +37,6 @@ for file_name, target in zip(folder1.file, folder1.tag):
 				if char.lower() in "abcdefghijklmnopqrstuvwxyz0123456789"]
 		while len(temp) != 23:
 			temp.append(36)
-		print(temp)
 		list_target.append(temp)
 
 model = first_model()
@@ -44,4 +44,13 @@ model = first_model()
 prediction = model.predict(list_file)
 print(np.mean(prediction == np.array(list_target)))
 
+one_hot_target = np.array([[np.eye(37)[i] for i in l] for l in list_target])
+with tf.Session() as sess:
+	sess.run(tf.global_variables_initializer())
+	for i in range(1):
+		print("Epoch: %r"%i)
+		model.train_step(list_file, one_hot_target, sess)
+
+prediction = model.predict(list_file)
+print(np.mean(prediction == np.array(list_target)))
 
