@@ -1,5 +1,5 @@
 # coding: utf-8
-from settings import training_directory
+from .settings import training_directory
 from os.path import join as pjoin
 import pandas as pd
 import numpy as np
@@ -7,8 +7,6 @@ import tensorflow as tf
 import matplotlib.pyplot as plt
 
 data = pd.read_csv(pjoin(training_directory, "word.csv"), sep=";", encoding="utf8", index_col=0)
-
-print(data.head())
 
 
 def weight_variable(shape):
