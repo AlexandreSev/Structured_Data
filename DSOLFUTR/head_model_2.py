@@ -1,84 +1,76 @@
-# coding : utf-8
+#coding:utf-8
 
-import numpy as np
 import tensorflow as tf
-import pandas as pd
-from nltk.util import ngrams
+import numpy as np
 
-#  input = shape(4, 4, 256)
+from .convolution_part import convolutional_part
+from .ngrams import get_ngrams, get_dict_ngrams
 
-data = pd.read_csv("word.csv", sep=";", encoding="utf8", index_col=0)
 
-tuple_letters = []
-tuple_bigrams = []
-tuple_trigrams = []
-list_letters = []
-list_bigrams = []
-list_trigrams = []
-elements_to_remove = ['"','-', 'é', '£', ')',"ñ",'?','&','!','(',':',"'"]
 
-for tag in data['tag']:
+#        self.dict_ngrams = get_dict_ngrams(self.ngrams)
 
-    tuple_letters += list(ngrams(tag, 1))
-    tuple_bigrams += list(ngrams(tag, 2))
-    tuple_trigrams += list(ngrams(tag, 3))
+def weight_variable(shape):
+    initial = tf.truncated_normal(shape, stddev=0.01)
+    return tf.Variable(initial)
 
-# created list_unique_letter of all the letters and numbers in the text
+def bias_variable(shape):
+    initial = tf.constant(0., shape=shape)
+    return tf.Variable(initial)
 
-for element in tuple_letters :
-    for letter in list(element):
-        letter = letter.lower()
-        list_letters.append(letter)
 
-list_unique_letter = set()
-[x for x in list_letters if x not in list_unique_letter and not list_unique_letter.add(x)]
 
-list_unique_letter = list(list_unique_letter)
+class second_model():
+    """
+    """
 
-for elts in elements_to_remove :
-    list_unique_letter.remove(elts)
+    def __init__(self, input_shape=(None, 32, 32, 1), learning_rate=1e-4):
+        
+        self.ngrams = get_ngrams()
 
-##### created list_unique_bigrams of all the bigrams in the text
+        self.output_size = len(self.ngrams)
 
-for element in tuple_bigrams :
-    list_element=list(element)
-    if (list_element[0] in elements_to_remove) or (list_element[1] in elements_to_remove) :
-        pass
-    else :
-        l1 = list_element[0].lower()
-        l2 = list_element[1].lower()
-        element_used = ''.join([l1,l2])
-        if len(element_used)==1:
-            pass
-        else :
-            list_bigrams.append(element_used)
+        self.cnn = convolutional_part(input_shape)
 
-list_unique_bigrams = set()
-[x for x in list_bigrams if x not in list_unique_bigrams and not list_unique_bigrams.add(x)]
+        self.W_h = weight_variable(shape=(4096, 256))
+        self.b_h = bias_variable(shape=[256])
+        
+        self.input = tf.reshape(self.cnn.maxpool3, [-1, 4096])
 
-list_unique_bigrams = list(list_unique_bigrams)
+        self.h = tf.nn.relu(tf.matmul(self.input, self.W_h) + self.b_h)
 
-# print(list_unique_bigrams)
+        self.W_o = weight_variable(shape=(256, self.output_size))
+        self.b_o = bias_variable(shape=[self.output_size])
 
-##### created list_unique_trigrams of all the trigrams in the text
+        self.output = tf.sigmoid(tf.matmul(self.h, self.W_o) + self.b_o) 
 
-for element in tuple_trigrams :
-    list_element=list(element)
-    if (list_element[0] in elements_to_remove) or (list_element[1] in elements_to_remove) or (list_element[2] in elements_to_remove) :
-        pass
-    else :
-        l1 = list_element[0].lower()
-        l2 = list_element[1].lower()
-        l3 = list_element[2].lower()
-        element_used = ''.join([l1,l2,l3])
-        if len(element_used)==3:
-            list_trigrams.append(element_used)
-        else :
-            pass
 
-list_unique_trigrams = set()
-[x for x in list_trigrams if x not in list_unique_trigrams and not list_unique_trigrams.add(x)]
+        self.target = tf.placeholder(tf.float32, shape=(None, self.output_size)) 
 
-list_unique_trigrams = list(list_unique_trigrams)
+        self.create_train(learning_rate=learning_rate)
+    
 
-# print(list_unique_trigrams)
+    def predict(self, x, sess, seuil=0.5):
+        feed_dict = {self.cnn.x: x}
+        predicted = sess.run(self.output, feed_dict=feed_dict)
+        return (predicted > seuil).astype(np.int)
+
+    def create_train(self, learning_rate=0.001):
+        self.loss = tf.nn.l2_loss(self.output - self.target)
+        self.train_step = tf.train.AdamOptimizer(learning_rate).minimize(self.loss)
+        
+
+    def f_train_step(self, x, target, sess):
+        feed_dict = {self.cnn.x: x, self.target: target}
+        loss_score = (sess.run(self.loss, feed_dict=feed_dict))
+        sess.run(self.train_step, feed_dict=feed_dict)
+        print("Loss: %s"%loss_score)
+
+if __name__== '__main__':
+    from .settings import training_directory
+    from os.path import join as pjoin
+    a = second_model()
+    test = np.load(pjoin(training_directory, 'test.npy')).reshape(1,32,32,3)
+    with tf.Session() as sess:
+        sess.run(tf.global_variables_initializer())
+        a.predict(test)

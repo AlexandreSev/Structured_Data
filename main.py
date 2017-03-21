@@ -24,7 +24,8 @@ for file_name, target in zip(folder1.file, folder1.tag):
 	temp_name = file_name.split(".")
 	temp_name = "".join(temp_name[:-1] + ["_reshaped.npy"])
 	if firststep:
-		list_file = rgb2gray(np.load(pjoin(training_directory, temp_name))).reshape((1, 32, 32, 1))
+		#list_file = rgb2gray(np.load(pjoin(training_directory, temp_name))).reshape((1, 32, 32, 1))
+		list_file = np.load(pjoin(training_directory, temp_name)).reshape((1, 32, 32, 1))
 		temp = list(target)
 		temp = [dict_conversion[char.lower()] for char in temp 
 				if char.lower() in "abcdefghijklmnopqrstuvwxyz0123456789"]
@@ -33,8 +34,10 @@ for file_name, target in zip(folder1.file, folder1.tag):
 		list_target = [temp]
 		firststep = False
 	else:
+		#list_file = np.vstack((list_file, 
+		#			rgb2gray(np.load(pjoin(training_directory, temp_name))).reshape((1, 32, 32, 1))))
 		list_file = np.vstack((list_file, 
-					rgb2gray(np.load(pjoin(training_directory, temp_name))).reshape((1, 32, 32, 1))))
+					np.load(pjoin(training_directory, temp_name)).reshape((1, 32, 32, 1))))
 		temp = list(target)
 		temp = [dict_conversion[char.lower()] for char in temp 
 				if char.lower() in "abcdefghijklmnopqrstuvwxyz0123456789"]

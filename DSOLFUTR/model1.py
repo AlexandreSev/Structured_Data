@@ -1,6 +1,4 @@
-# input shape None, 4, 4, 256
-# compte tf.matmul # avec en gros le x comme le poids pour avoir 
-# y = tf.matmul(X, W)
+# coding: utf-8
 
 import tensorflow as tf
 import numpy as np
