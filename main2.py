@@ -1,12 +1,12 @@
 #coding: utf- 8
 
-from DSOLFUTR.settings import training_directory
+from DSOLFUTR.utils.settings import training_directory
 from os.path import join as pjoin
-from DSOLFUTR.head_model_2 import second_model
+from DSOLFUTR.models.model2 import second_model
 import numpy as np
 import tensorflow as tf
 from skimage.color import rgb2gray
-from DSOLFUTR.ngrams import get_dict_ngrams, get_ngrams
+from DSOLFUTR.utils.ngrams import get_dict_ngrams, get_ngrams
 import pandas as pd
 from time import gmtime, strftime
 import pickle
@@ -68,3 +68,4 @@ with tf.Session() as sess:
 			print("Model saved in file: %s" % save_path)
 			with open('accuracy_2.pickle', 'wb') as file:
 				pickle.dump(accuracy, file, protocol=pickle.HIGHEST_PROTOCOL)
+				

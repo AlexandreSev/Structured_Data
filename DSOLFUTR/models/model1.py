@@ -2,6 +2,8 @@
 
 import tensorflow as tf
 import numpy as np
+from time import gmtime, strftime
+import pickle
 
 from .convolution_part import convolutional_part
 
@@ -16,11 +18,9 @@ def bias_variable(shape):
 
 
 class first_model():
-	"""
-	"""
 
+	
 	def __init__(self, input_shape=(None, 32, 32, 1), learning_rate=1e-4):
-		
 		self.cnn = convolutional_part(input_shape)
 
 		self.W = np.array([weight_variable((4096, 37)) for _ in range(23)])
@@ -33,7 +33,7 @@ class first_model():
 								for k in range(23)])
 
 		self.create_train(learning_rate=learning_rate)
-	
+		
 
 	def predict(self, x, sess, all_k=True, onek=0):
 		if not all_k:
@@ -46,6 +46,7 @@ class first_model():
 				predicted[:, k, :] = sess.run(self.output[k], feed_dict=feed_dict)
 			return np.argmax(predicted, axis=-1)
 
+
 	def create_train(self, learning_rate=0.001):
 		self.train_steps = []
 		self.true_probas = []
@@ -54,7 +55,7 @@ class first_model():
 			self.train_steps.append(tf.train.AdamOptimizer(learning_rate).minimize(self.true_probas[k]))
 		
 
-	def train_step(self, x, target, sess):
+	def f_train_step(self, x, target, sess):
 		loss_score = 0
 		for k in range(23):
 			feed_dict = {self.cnn.x: x, self.target[k]: target[:, k, :]}
@@ -62,6 +63,33 @@ class first_model():
 			sess.run(self.train_steps[k], feed_dict=feed_dict)
 		print("Loss: %s"%loss_score)
 
-if __name__== '__main__':
-	a = first_model()
-	test = np.load('test.npy').reshape(1,32,32,3)
+
+	def train(self, x, target, sess, nb_epoch=100, save=True, warmstart=False, 
+			  weights_path="./model1.ckpt", save_path="./model1.ckpt", training_target=None):
+
+		prediction = self.predict(x, sess)
+		print("Initial accuracy: %s"%np.mean(prediction == np.array(target)))
+
+		saver = tf.train.Saver()
+
+		if warmstart:
+			saver.restore(sess, weights_path)
+			print("Model Loaded.")
+		
+		accuracy = []
+		for i in range(1, nb_epoch + 1):
+
+			self.f_train_step(x, training_target, sess)
+			print(strftime("%H:%M:%S", gmtime())+" Epoch: %r"%i)
+			
+			if i % 10 == 0:
+				prediction = self.predict(x, sess)
+				print("accuracy: "+str(np.mean(prediction == list_target)))
+				accuracy.append(np.mean(prediction == target))
+
+			if save & (i % 50 == 0):
+				save_path = saver.save(sess, save_path)
+				print("Model saved in file: %s" % save_path)
+				with open('accuracy_1.pickle', 'wb') as file:
+					pickle.dump(accuracy, file, protocol=pickle.HIGHEST_PROTOCOL)
+

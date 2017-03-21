@@ -1,5 +1,5 @@
 # coding: utf-8
-from .settings import training_directory
+from ..utils.settings import training_directory
 from os.path import join as pjoin
 import pandas as pd
 import numpy as np
