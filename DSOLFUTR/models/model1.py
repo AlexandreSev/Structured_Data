@@ -33,6 +33,8 @@ class first_model():
 								for k in range(23)])
 
 		self.create_train(learning_rate=learning_rate)
+
+		self.max_validation_accuracy = 0
 		
 
 	def predict(self, x, sess, all_k=True, onek=0):
@@ -86,17 +88,16 @@ class first_model():
 			self.f_train_step(x, training_target, sess)
 			print(strftime("%H:%M:%S", gmtime())+" Epoch: %r"%i)
 			
-			if i % 10 == 0:
+			if i % 5 == 0:
 				print("Training accuracy: %s" %self.compute_accuracy(x, target, sess))
 				if test_x is not None:
-					print("Validation accuracy: %s" %self.compute_accuracy(test_x, test_target, sess))
-				accuracy.append(np.mean(prediction == target))
-
-			if save & (i % 50 == 0):
-				save_path = saver.save(sess, save_path)
-				print("Model saved in file: %s" % save_path)
-				with open('accuracy_1.pickle', 'wb') as file:
-					pickle.dump(accuracy, file, protocol=pickle.HIGHEST_PROTOCOL)
+					current_accuracy = self.compute_accuracy(test_x, test_target, sess)
+					print("Validation accuracy: %s" %current_accuracy)
+					if current_accuracy > self.max_validation_accuracy:
+						save_path = saver.save(sess, save_path)
+						print("Model saved in file: %s" % save_path)
+						with open('accuracy_1.pickle', 'wb') as file:
+							pickle.dump(accuracy, file, protocol=pickle.HIGHEST_PROTOCOL)
 
 	def compute_accuracy(self, x, target, sess):
 		predicted = self.predict(x, sess)
