@@ -65,7 +65,11 @@ class first_model():
 
 
 	def train(self, x, target, sess, nb_epoch=100, save=True, warmstart=False, 
-			  weights_path="./model1.ckpt", save_path="./model1.ckpt", training_target=None):
+			  weights_path="./model1.ckpt", save_path="./model1.ckpt", training_target=None,
+			  test_x=None, test_target=None):
+
+		print( "%s training pictures"%x.shape[0])
+		print( "%s testing pictures"%test_x.shape[0])
 
 		prediction = self.predict(x, sess)
 		print("Initial accuracy: %s"%np.mean(prediction == np.array(target)))
@@ -83,8 +87,9 @@ class first_model():
 			print(strftime("%H:%M:%S", gmtime())+" Epoch: %r"%i)
 			
 			if i % 10 == 0:
-				prediction = self.predict(x, sess)
-				print("accuracy: "+str(np.mean(prediction == list_target)))
+				print("Training accuracy: %s" %self.compute_accuracy(x, target, sess))
+				if test_x is not None:
+					print("Validation accuracy: %s" %self.compute_accuracy(test_x, test_target, sess))
 				accuracy.append(np.mean(prediction == target))
 
 			if save & (i % 50 == 0):
@@ -93,3 +98,6 @@ class first_model():
 				with open('accuracy_1.pickle', 'wb') as file:
 					pickle.dump(accuracy, file, protocol=pickle.HIGHEST_PROTOCOL)
 
+	def compute_accuracy(self, x, target, sess):
+		predicted = self.predict(x, sess)
+		return (np.mean(predicted == target))

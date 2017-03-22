@@ -7,10 +7,12 @@ import pandas as pd
 import numpy as np
 from os.path import join as pjoin
 
+from sklearn.model_selection import train_test_split
+
 
 def get_one_folder(n):
 	data = pd.read_csv(pjoin(training_directory, "word.csv"), sep=";", encoding="utf8", index_col=0)
-	return data[data.file.apply(lambda r: (r.split('/')[1] == "1"))]
+	return data[data.file.apply(lambda r: (r.split('/')[1] == str(n)))]
 
 
 def create_conversion_model1():
@@ -39,8 +41,8 @@ def process_target_model_2(targets, dict_conversion):
 
 	list_target = np.zeros((len(targets), len(dict_conversion.keys())))
 
-	for nrow, target in enumerate(list_target):
-		list_tag = [dict_conversion.get(i, None) for i in get_ngrams(targets)]
+	for nrow, target in enumerate(targets):
+		list_tag = [dict_conversion.get(i, None) for i in get_ngrams(target)]
 
 		for i in list_tag:
 			if i is not None:
@@ -55,6 +57,7 @@ def process_file_name(file_names):
 		temp_name = pjoin(training_directory, "".join(temp_name[:-1] + ["_reshaped.npy"]))
 		if firststep:
 			list_file = np.load(temp_name).reshape((1, 32, 32, 1))
+			firststep = False
 		else:
 			list_file = np.vstack((list_file, np.load(temp_name).reshape((1, 32, 32, 1))))
 	return list_file
@@ -72,8 +75,10 @@ def preprocess_data(folder, n_model=1):
 		list_target = process_target_model_2(folder.tag, dict_conversion)
 	else:
 		raise ValueError
+
+	train_file, test_file, train_target, test_target = train_test_split(list_file, list_target)
 	
-	return list_file, list_target
+	return train_file, test_file, train_target, test_target 
 
 def one_hot(list_target, n=37):
 	return np.array([[np.eye(n)[i] for i in l] for l in list_target])

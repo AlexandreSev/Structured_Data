@@ -32,7 +32,9 @@ def get_ngrams(word=None):
 
     for tag in list_tag:
 
-
+        if (0.0, ) in list(ngrams(tag, 1)):
+            print(word)
+            print(tag)
         tuple_letters += list(ngrams(tag, 1))
         tuple_bigrams += list(ngrams(tag, 2))
         tuple_trigrams += list(ngrams(tag, 3))
