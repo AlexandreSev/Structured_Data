@@ -6,8 +6,10 @@ from .ngrams import get_dict_ngrams, get_ngrams
 import pandas as pd
 import numpy as np
 from os.path import join as pjoin
+import tensorflow as tf 
 
 from sklearn.model_selection import train_test_split
+
 
 
 def get_one_folder(n):
@@ -17,7 +19,7 @@ def get_one_folder(n):
 
 def create_conversion_model1():
 	dict_conversion = {}
-	for i, char in enumerate("abcdefghijklmnopqrstuvwxyz0123456789"):
+	for i, char in enumerate("abcdefghijklmnopqrstuvwxyz0123456789_"):
 		dict_conversion[char] = i
 	return dict_conversion
 
@@ -73,6 +75,8 @@ def preprocess_data(folder, n_model=1):
 		list_ngrams = get_ngrams()
 		dict_conversion = get_dict_ngrams(list_ngrams)
 		list_target = process_target_model_2(folder.tag, dict_conversion)
+	elif n_model == 3:
+		list_target = np.array(folder.tag)
 	else:
 		raise ValueError
 
@@ -83,5 +87,16 @@ def preprocess_data(folder, n_model=1):
 def one_hot(list_target, n=37):
 	return np.array([[np.eye(n)[i] for i in l] for l in list_target])
 
+def weight_variable(shape):
+	initial = tf.truncated_normal(shape, stddev=0.01)
+	return tf.Variable(initial)
 
+def bias_variable(shape):
+	initial = tf.constant(0., shape=shape)
+	return tf.Variable(initial)
 
+def get_score(prediction2, dico_conversion, x):
+	if x in dico_conversion:
+		return prediction2[dico_conversion[x]]
+	else:
+		return 0.5

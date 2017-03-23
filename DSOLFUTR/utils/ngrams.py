@@ -86,4 +86,8 @@ def get_dict_ngrams(list_ngrams):
         response[char] = i
     return response
 
-# print(list_unique_trigrams)
+def reverse_dict(input_dict):
+    response = {}
+    for key in input_dict:
+        response[input_dict[key]] = key
+    return response

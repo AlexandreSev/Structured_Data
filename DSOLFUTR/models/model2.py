@@ -7,38 +7,31 @@ import pickle
 
 from .convolution_part import convolutional_part
 from ..utils.ngrams import get_ngrams, get_dict_ngrams
-
-
-def weight_variable(shape):
-	initial = tf.truncated_normal(shape, stddev=0.01)
-	return tf.Variable(initial)
-
-def bias_variable(shape):
-	initial = tf.constant(0., shape=shape)
-	return tf.Variable(initial)
-
-
+from ..utils.utils import weight_variable, bias_variable
 
 class second_model():
 	"""
 	"""
 
-	def __init__(self, input_shape=(None, 32, 32, 1), learning_rate=1e-4):
+	def __init__(self, input_shape=(None, 32, 32, 1), learning_rate=1e-4, cnn=None):
 		
 		self.ngrams = get_ngrams()
 
 		self.output_size = len(self.ngrams)
 
-		self.cnn = convolutional_part(input_shape)
+		if cnn is None:
+			self.cnn = convolutional_part(input_shape)
+		else:
+			self.cnn = cnn
 
-		self.W_h = weight_variable(shape=(4096, 256))
-		self.b_h = bias_variable(shape=[256])
+		self.W_h = weight_variable(shape=(4096, 1024))
+		self.b_h = bias_variable(shape=[1024])
 		
 		self.input = tf.reshape(self.cnn.maxpool3, [-1, 4096])
 
 		self.h = tf.nn.relu(tf.matmul(self.input, self.W_h) + self.b_h)
 
-		self.W_o = weight_variable(shape=(256, self.output_size))
+		self.W_o = weight_variable(shape=(1024, self.output_size))
 		self.b_o = bias_variable(shape=[self.output_size])
 
 		self.output = tf.sigmoid(tf.matmul(self.h, self.W_o) + self.b_o) 
@@ -50,6 +43,9 @@ class second_model():
 
 		self.max_validation_accuracy = 0
 	
+	def predict_proba(self, x, sess):
+		feed_dict = {self.cnn.x: x}
+		return sess.run(self.output, feed_dict=feed_dict)
 
 	def predict(self, x, sess, treshold=0.5):
 		feed_dict = {self.cnn.x: x}
@@ -68,8 +64,8 @@ class second_model():
 		print("Loss: %s"%loss_score)
 
 	def train(self, x, target, sess, nb_epoch=100, save=True, warmstart=False, 
-			  weights_path="./model2.ckpt", save_path="./model2.ckpt", training_target=None,
-			  test_x=None, test_target=None):
+			  weights_path="./model2.ckpt", save_path="./model2.ckpt", test_x=None, 
+			  test_target=None):
 		
 		print( "%s training pictures"%x.shape[0])
 		print( "%s testing pictures"%test_x.shape[0])

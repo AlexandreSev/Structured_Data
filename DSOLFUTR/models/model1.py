@@ -6,22 +6,18 @@ from time import gmtime, strftime
 import pickle
 
 from .convolution_part import convolutional_part
-
-def weight_variable(shape):
-	initial = tf.truncated_normal(shape, stddev=0.01)
-	return tf.Variable(initial)
-
-def bias_variable(shape):
-	initial = tf.constant(0., shape=shape)
-	return tf.Variable(initial)
-
+from ..utils.utils import weight_variable, bias_variable, one_hot
 
 
 class first_model():
 
 	
-	def __init__(self, input_shape=(None, 32, 32, 1), learning_rate=1e-4):
-		self.cnn = convolutional_part(input_shape)
+	def __init__(self, input_shape=(None, 32, 32, 1), learning_rate=1e-4, cnn=None):
+		
+		if cnn is None:
+			self.cnn = convolutional_part(input_shape)
+		else:
+			self.cnn = cnn
 
 		self.W = np.array([weight_variable((4096, 37)) for _ in range(23)])
 		self.b = np.array([bias_variable([37]) for _ in range(23)])
@@ -35,7 +31,17 @@ class first_model():
 		self.create_train(learning_rate=learning_rate)
 
 		self.max_validation_accuracy = 0
-		
+
+	def predict_proba(self, x, sess, all_k=True, onek=0):
+		if not all_k:
+			feed_dict = {self.cnn.x: x}
+			return sess.run(self.output[onek], feed_dict=feed_dict)
+		else:
+			predicted = np.zeros((x.shape[0], 23, 37))
+			for k in range(23):
+				feed_dict = {self.cnn.x: x}
+				predicted[:, k, :] = sess.run(self.output[k], feed_dict=feed_dict)
+			return predicted
 
 	def predict(self, x, sess, all_k=True, onek=0):
 		if not all_k:
@@ -67,11 +73,16 @@ class first_model():
 
 
 	def train(self, x, target, sess, nb_epoch=100, save=True, warmstart=False, 
-			  weights_path="./model1.ckpt", save_path="./model1.ckpt", training_target=None,
-			  test_x=None, test_target=None):
+			  weights_path="./model1.ckpt", save_path="./model1.ckpt", test_x=None, 
+			  test_target=None):
+
+		training_target = one_hot(target)
 
 		print( "%s training pictures"%x.shape[0])
 		print( "%s testing pictures"%test_x.shape[0])
+
+		print("Goal on the training set: %s"%np.mean(target == 36))
+		print("Goal on the testing set: %s"%np.mean(test_target == 36))
 
 		prediction = self.predict(x, sess)
 		print("Initial accuracy: %s"%np.mean(prediction == np.array(target)))
@@ -102,3 +113,4 @@ class first_model():
 	def compute_accuracy(self, x, target, sess):
 		predicted = self.predict(x, sess)
 		return (np.mean(predicted == target))
+		
