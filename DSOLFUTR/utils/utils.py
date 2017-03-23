@@ -44,7 +44,10 @@ def process_target_model_2(targets, dict_conversion):
 	list_target = np.zeros((len(targets), len(dict_conversion.keys())))
 
 	for nrow, target in enumerate(targets):
-		list_tag = [dict_conversion.get(i, None) for i in get_ngrams(target)]
+		target_completed = target
+		while len(target_completed) != 23:
+			target_completed += "_"
+		list_tag = [dict_conversion.get(i, None) for i in get_ngrams(target_completed)]
 
 		for i in list_tag:
 			if i is not None:

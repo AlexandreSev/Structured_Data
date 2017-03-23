@@ -68,11 +68,17 @@ class hybrid_model():
 		print("Goal on the training set: %s"%np.mean(target == 0))
 		print("Goal on the testing set: %s"%np.mean(test_target == 0))
 
-		target_model_1 = one_hot(process_target_model_1(target, self.dict_conversion))
+		target_model_1 = process_target_model_1(target, self.dict_conversion)
+		training_target_model_1 = one_hot(target_model_1)
 		target_model_2 = process_target_model_2(target, self.dict_ngrams)
+
+		test_target_m1 = process_target_model_1(test_target, self.dict_conversion)
 
 		prediction = self.predict(x, sess)
 		print("Initial accuracy: %s"%np.mean(prediction == np.array(target)))
+
+		tmp = self.first_model.compute_accuracy(x, target_model_1, sess)
+		print("Initial accuracy character per character: %s"%tmp )
 
 		saver = tf.train.Saver()
 
@@ -83,14 +89,18 @@ class hybrid_model():
 		accuracy = []
 		for i in range(1, nb_epoch + 1):
 
-			self.f_train_step(x, target_model_1, target_model_2, sess)
+			self.f_train_step(x, training_target_model_1, target_model_2, sess)
 			print(strftime("%H:%M:%S", gmtime())+" Epoch: %r"%i)
 			
 			if i % 5 == 0:
+				tmp = self.first_model.compute_accuracy(x, target_model_1, sess)
+				print("Training accuracy character per character: %s"%tmp )
 				print("Training accuracy: %s" %self.compute_accuracy(x, target, sess))
 				if test_x is not None:
-					current_accuracy = self.compute_accuracy(test_x, test_target, sess)
-					print("Validation accuracy: %s" %current_accuracy)
+					tmp = self.compute_accuracy(test_x, test_target, sess)
+					print("Validation accuracy: %s" %tmp)
+					current_accuracy = self.first_model.compute_accuracy(test_x, test_target_m1, sess)
+					print("Testing accuracy character per character: %s"%current_accuracy )
 					if current_accuracy > self.max_validation_accuracy:
 						save_path = saver.save(sess, save_path)
 						print("Model saved in file: %s" % save_path)
