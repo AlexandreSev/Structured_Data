@@ -19,12 +19,20 @@ class first_model():
 		else:
 			self.cnn = cnn
 
-		self.W = np.array([weight_variable((4096, 37)) for _ in range(23)])
-		self.b = np.array([bias_variable([37]) for _ in range(23)])
 		self.input = tf.reshape(self.cnn.maxpool3, [-1, 4096])
 
-		self.output = np.array([tf.nn.softmax(tf.matmul(self.input, self.W[k]) + self.b[k], dim=-1) 
-								for k in range(23)])
+		self.W_h = weight_variable((4096, 512))
+		self.b_h = bias_variable([512])
+
+		self.h = tf.nn.relu(tf.matmul(self.input, self.W_h) + self.b_h)	
+
+		self.dropouted_h = tf.nn.dropout(self.h, 0.7)	
+
+		self.W_o = np.array([weight_variable((512, 37)) for _ in range(23)])
+		self.b_o = np.array([bias_variable([37]) for _ in range(23)])
+
+		self.output = np.array([tf.nn.softmax(tf.matmul(self.dropouted_h, self.W_o[k]) + self.b_o[k], 
+								dim=-1) for k in range(23)])
 		self.target = np.array([tf.placeholder(tf.float32, shape=(None, 37)) 
 								for k in range(23)])
 
@@ -105,6 +113,7 @@ class first_model():
 					current_accuracy = self.compute_accuracy(test_x, test_target, sess)
 					print("Validation accuracy: %s" %current_accuracy)
 					if current_accuracy > self.max_validation_accuracy:
+						self.max_validation_accuracy = current_accuracy
 						save_path = saver.save(sess, save_path)
 						print("Model saved in file: %s" % save_path)
 						with open('accuracy_1.pickle', 'wb') as file:

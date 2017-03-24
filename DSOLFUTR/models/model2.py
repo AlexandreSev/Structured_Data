@@ -31,10 +31,12 @@ class second_model():
 
 		self.h = tf.nn.relu(tf.matmul(self.input, self.W_h) + self.b_h)
 
+		self.dropouted_h = tf.nn.dropout(self.h, 0.7)
+
 		self.W_o = weight_variable(shape=(1024, self.output_size))
 		self.b_o = bias_variable(shape=[self.output_size])
 
-		self.output = tf.sigmoid(tf.matmul(self.h, self.W_o) + self.b_o) 
+		self.output = tf.sigmoid(tf.matmul(self.dropouted_h, self.W_o) + self.b_o) 
 
 
 		self.target = tf.placeholder(tf.float32, shape=(None, self.output_size)) 
@@ -94,6 +96,7 @@ class second_model():
 					current_accuracy = self.compute_accuracy(test_x, test_target, sess)
 					print("Validation accuracy: %s" %current_accuracy)
 					if current_accuracy > self.max_validation_accuracy:
+						self.max_validation_accuracy = current_accuracy
 						save_path = saver.save(sess, save_path)
 						print("Model saved in file: %s" % save_path)
 						with open('accuracy_2.pickle', 'wb') as file:

@@ -102,6 +102,7 @@ class hybrid_model():
 					current_accuracy = self.first_model.compute_accuracy(test_x, test_target_m1, sess)
 					print("Testing accuracy character per character: %s"%current_accuracy )
 					if current_accuracy > self.max_validation_accuracy:
+						self.max_validation_accuracy = current_accuracy
 						save_path = saver.save(sess, save_path)
 						print("Model saved in file: %s" % save_path)
 						with open('accuracy_3.pickle', 'wb') as file:
