@@ -26,7 +26,7 @@ def beam_search(prediction1, prediction2, list_character, dico_ngrams, dico_conv
     list_score = [prediction1[dico_conversion1[i]] + get_score(prediction2, dico_ngrams, i) for i in list_character]
     list_character = "abcdefghijklmnopqrstuvwxyz0123456789_"
     
-    list_candidates = zip(list_score, list_character)
+    list_candidates = list(zip(list_score, list_character))
     list_candidates.sort(reverse=True)
     list_candidates = list_candidates[0:beam_size]
 
