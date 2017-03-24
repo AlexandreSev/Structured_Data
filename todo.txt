@@ -11,4 +11,6 @@
 5. Faire tourner sur tous les dossier avec une séparation train et validation (C'est codé, il faut faire tourner)
 6. Essayer avec d'autres datasets
 7. Faire de jolis graphiques pour le latex (progression de la loss, de l'accuracy, du f1-score ...)
-8. Rajouter les "*_" aux ngrams, * étant une letre ou un chiffre
+8. Rajouter les "*_" aux ngrams, * étant une letre ou un chiffre ( Done )
+9. Faire du contrôle d'overfitting (dropout)
+10. Gérer les tailles des layers
