@@ -65,6 +65,11 @@ class second_model():
 		sess.run(self.train_step, feed_dict=feed_dict)
 		print("Loss: %s"%loss_score)
 
+	def load_weights(self, weights_path, sess):
+		saver = tf.train.Saver()
+		saver.restore(sess, weights_path)
+		print("Model Loaded.")
+
 	def train(self, x, target, sess, nb_epoch=100, save=True, warmstart=False, 
 			  weights_path="./model2.ckpt", save_path="./model2.ckpt", test_x=None, 
 			  test_target=None):

@@ -38,7 +38,7 @@ class hybrid_model():
 
 		response = []
 		for nrow in range(x.shape[0]):
-			result = beam_search(prediction1[nrow, 0, :], prediction2[nrow], self.list_character, self.dict_ngrams,
+			result = beam_search(prediction1[nrow, :, :], prediction2[nrow], self.list_character, self.dict_ngrams,
 								 self.dict_conversion)
 			response.append(result)
 
@@ -57,6 +57,11 @@ class hybrid_model():
 		sess.run(self.second_model.train_step, feed_dict=feed_dict)
 		print("Loss model 2: %s"%loss_score2)
 		print("Loss: %s"%(loss_score1 + loss_score2))
+
+	def load_weights(self, weights_path, sess):
+		saver = tf.train.Saver()
+		saver.restore(sess, weights_path)
+		print("Model Loaded.")
 
 	def train(self, x, target, sess, nb_epoch=100, save=True, warmstart=False, 
 			  weights_path="./model3.ckpt", save_path="./model3.ckpt", test_x=None, 
@@ -95,10 +100,10 @@ class hybrid_model():
 			if i % 5 == 0:
 				tmp = self.first_model.compute_accuracy(x, target_model_1, sess)
 				print("Training accuracy character per character: %s"%tmp )
-				print("Training accuracy: %s" %self.compute_accuracy(x, target, sess))
+				# print("Training accuracy: %s" %self.compute_accuracy(x, target, sess))
 				if test_x is not None:
-					tmp = self.compute_accuracy(test_x, test_target, sess)
-					print("Validation accuracy: %s" %tmp)
+					#tmp = self.compute_accuracy(test_x, test_target, sess)
+					#print("Validation accuracy: %s" %tmp)
 					current_accuracy = self.first_model.compute_accuracy(test_x, test_target_m1, sess)
 					print("Testing accuracy character per character: %s"%current_accuracy )
 					if current_accuracy > self.max_validation_accuracy:
