@@ -27,7 +27,7 @@ def get_ngrams(word=None):
     list_letters = []
     list_bigrams = []
     list_trigrams = []
-    elements_to_keep = "abcdefghijklmnopqrstuvwxyz0123456789"
+    elements_to_keep = "abcdefghijklmnopqrstuvwxyz0123456789_"
 
 
     for tag in list_tag:
