@@ -7,7 +7,7 @@
 1. Mettre au propre les main et les fusionner ( Done )
 2. faire le resumé sur le latex
 3. Faire le readme du git
-4. Coder le modèle 3 ( vérification du beamsearch notamment)
+4. Coder le modèle 3 ( Done )
 5. Faire tourner sur tous les dossier avec une séparation train et validation (C'est codé, il faut faire tourner)
 6. Essayer avec d'autres datasets
 7. Faire de jolis graphiques pour le latex (progression de la loss, de l'accuracy, du f1-score ...)
