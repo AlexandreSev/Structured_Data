@@ -103,3 +103,13 @@ def get_score(prediction2, dico_conversion, x):
 		return prediction2[dico_conversion[x]]
 	else:
 		return 0.5
+
+def visualize(prediction, dict_inverse):
+	"""
+	prediction: is a Npred x 23 arrays
+	"""
+	output = []
+	for word in range(len(prediction)):
+		outputword = "".join([dico_inverse[i] for i in prediction[word]])
+		output.append(outputword)
+	return output

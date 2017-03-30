@@ -6,11 +6,12 @@ from keras.applications.resnet50 import ResNet50
 
 input_shape=(197, 197, 3)
 
-class convolutional_part():
+class resnet:
 
 	def __init__(self):
 		#self.maxpool3 = ResNet50(include_top=False, weights='imagenet', input_tensor=None, input_shape=input_shape, pooling=None)
-		self.maxpool3 = ResNet50(include_top=False, input_shape=input_shape)
+		self.model = ResNet50(include_top=False, input_shape=input_shape)
+		self.maxpool3 = self.model.output
 
 	def predict(self, input):
 		#with tf.Session() as sess:
