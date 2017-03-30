@@ -21,11 +21,11 @@ def main(folder=None, n_model=1, nb_epoch=100, save=True, warmstart=False,
 	train_file, test_file, train_target, test_target = preprocess_data(data, n_model=n_model, shape=(1, 197, 197, 3))
 
 	with tf.Session() as sess:
-
+		input_shape=(None, 197, 197, 3)
 		if n_model == 1:
-			model = model1.first_model(cnn=cnn.resnet(), input_shape=(None, 197, 197, 3))
+			model = model1.first_model(cnn=cnn.resnet(), input_shape=input_shape)
 		elif n_model == 2:
-			model = model2.second_model()
+			model = model2.second_model(input_shape=input_shape)
 		elif n_model == 3:
 			model = model3.hybrid_model()
 		else:
