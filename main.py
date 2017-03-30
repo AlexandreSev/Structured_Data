@@ -6,7 +6,7 @@ import tensorflow as tf
 from DSOLFUTR.utils.utils import *
 from DSOLFUTR.utils.settings import training_directory
 
-from DSOLFUTR.models import model1, model2, model3
+from DSOLFUTR.models import model1, model2, model3, cnn
 
 def main(folder=None, n_model=1, nb_epoch=100, save=True, warmstart=False, 
               weights_path="./model1.ckpt", save_path="./model1.ckpt"):
@@ -18,12 +18,12 @@ def main(folder=None, n_model=1, nb_epoch=100, save=True, warmstart=False,
 	else:
 		data = get_one_folder(folder)
 
-	train_file, test_file, train_target, test_target = preprocess_data(data, n_model=n_model)
+	train_file, test_file, train_target, test_target = preprocess_data(data, n_model=n_model, shape=(1, 197, 197, 3))
 
 	with tf.Session() as sess:
 
 		if n_model == 1:
-			model = model1.first_model()
+			model = model1.first_model(cnn=cnn.resnet(), input_shape=(None, 197, 197, 3))
 		elif n_model == 2:
 			model = model2.second_model()
 		elif n_model == 3:
@@ -37,5 +37,5 @@ def main(folder=None, n_model=1, nb_epoch=100, save=True, warmstart=False,
 
 
 if __name__ == "__main__":
-	main(n_model=3, folder=1, weights_path="./model3.ckpt", save_path="./model3.ckpt")
+	main(n_model=1, folder=1, weights_path="./model3.ckpt", save_path="./model3.ckpt", warmstart=False)
 
