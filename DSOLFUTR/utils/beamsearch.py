@@ -36,7 +36,7 @@ def beam_search(prediction1, prediction2, list_character, dico_ngrams, dico_conv
     list_candidates = next_step(list_candidates, prediction1, prediction2, list_character, dico_ngrams, dico_conversion1, 1,
                                 False, beam_size)
 
-    for i in range(1):
+    for i in range(21):
         list_candidates = next_step(list_candidates, prediction1, prediction2, list_character, dico_ngrams, dico_conversion1, 2 + i, 
                                 True, beam_size)
 
