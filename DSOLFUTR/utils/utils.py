@@ -1,7 +1,7 @@
 # coding: utf-8
 
 from .settings import training_directory
-from .ngrams import get_dict_ngrams, get_ngrams
+from .ngrams import get_dict_ngrams, get_ngrams 
 
 import pandas as pd
 import numpy as np
@@ -9,7 +9,6 @@ from os.path import join as pjoin
 import tensorflow as tf 
 
 from sklearn.model_selection import train_test_split
-
 
 
 def get_one_folder(n):
@@ -103,3 +102,32 @@ def get_score(prediction2, dico_conversion, x):
 		return prediction2[dico_conversion[x]]
 	else:
 		return 0.5
+
+def build_plot(pathnpyfile, Xaxis="Epochs", Yaxis="Loss"):
+	"""
+	Build the plot of Yaxis versus Xaxis
+	"""
+	list_to_be_plotted = np.load(pathnpyfile)
+	pd_list = pd.DataFrame(list_to_be_plotted.T, columns=[Xaxis, Yaxis])
+	# pd_list.plot()
+	sns.set_style("darkgrid")
+	plt.plot(pd_list[Xaxis], pd_list[Yaxis], label=Yaxis)
+	#seabornplot = sns.tsplot(data=pd_list, time = Xaxis, value=Yaxis)
+	plt.legend()
+
+	plt.savefig(r"output_"+Yaxis+".png") #time='Date', unit='Dummy', condition='Company', value='Price'
+	plt.show()
+
+
+def visualize(prediction, dict_inverse):
+	"""
+	prediction: is a Npred x 23 arrays
+	"""
+
+	output = []
+	for word in range(len(prediction)):
+		print(word)
+		for letter in prediction[word]: 
+			outputword = "".join(dict_inverse[prediction[word][letter]])
+		output.append(outputword)
+	return output
