@@ -18,12 +18,12 @@ def main(folder=None, n_model=1, nb_epoch=100, save=True, warmstart=False,
 	else:
 		data = get_one_folder(folder)
 
-	train_file, test_file, train_target, test_target = preprocess_data(data, n_model=n_model)
+	train_file, test_file, train_target, test_target = preprocess_data(data, n_model=n_model, shape=(1, 197, 197, 3))
 
 	with tf.Session() as sess:
 
 		if n_model == 1:
-			model = model1.first_model(cnn=cnn.resnet())
+			model = model1.first_model(cnn=cnn.resnet(), input_shape=(None, 197, 197, 3))
 		elif n_model == 2:
 			model = model2.second_model()
 		elif n_model == 3:

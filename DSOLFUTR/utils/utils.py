@@ -55,21 +55,21 @@ def process_target_model_2(targets, dict_conversion):
 
 	return list_target
 
-def process_file_name(file_names):
+def process_file_name(file_names, shape=(1, 32, 32, 1)):
 	firststep = True
 	for file_name in file_names:
 		temp_name = file_name.split(".")
 		temp_name = pjoin(training_directory, "".join(temp_name[:-1] + ["_reshaped.npy"]))
 		if firststep:
-			list_file = np.load(temp_name).reshape((1, 32, 32, 1))
+			list_file = np.load(temp_name).reshape(shape)
 			firststep = False
 		else:
-			list_file = np.vstack((list_file, np.load(temp_name).reshape((1, 32, 32, 1))))
+			list_file = np.vstack((list_file, np.load(temp_name).reshape(shape)))
 	return list_file
 
-def preprocess_data(folder, n_model=1):
+def preprocess_data(folder, n_model=1, shape=(1, 32, 32, 1)):
 
-	list_file = process_file_name(folder.file)
+	list_file = process_file_name(folder.file, shape)
 
 	if n_model == 1:
 		dict_conversion = create_conversion_model1()
