@@ -7,12 +7,14 @@ import pickle
 
 from .convolution_part import convolutional_part
 from ..utils.utils import weight_variable, bias_variable, one_hot
+from ..utils.callback import callback as callback_class
 
 
 class first_model():
 
 	
-	def __init__(self, input_shape=(None, 32, 32, 1), learning_rate=1e-4, cnn=None):
+	def __init__(self, input_shape=(None, 32, 32, 1), learning_rate=1e-4, cnn=None, callback=True, 
+				 callback_path="./"):
 		
 		if cnn is None:
 			self.cnn = convolutional_part(input_shape)
@@ -39,6 +41,12 @@ class first_model():
 		self.create_train(learning_rate=learning_rate)
 
 		self.max_validation_accuracy = 0
+
+		if callback:
+			self.callback = callback_class()
+			self.callback_path = callback_path
+		else:
+			self.callback = None
 
 	def predict_proba(self, x, sess, all_k=True, onek=0):
 		if not all_k:
@@ -78,6 +86,7 @@ class first_model():
 			loss_score += (sess.run(tf.reduce_sum(- tf.log(tf.reduce_sum(tf.multiply(self.output[k], self.target[k]), axis=1))), feed_dict=feed_dict))
 			sess.run(self.train_steps[k], feed_dict=feed_dict)
 		print("Loss: %s"%loss_score)
+		return loss_score
 
 	def load_weights(self, weights_path, sess):
 		saver = tf.train.Saver()
@@ -105,23 +114,30 @@ class first_model():
 			saver.restore(sess, weights_path)
 			print("Model Loaded.")
 		
-		accuracy = []
 		for i in range(1, nb_epoch + 1):
 
-			self.f_train_step(x, training_target, sess)
+			loss = self.f_train_step(x, training_target, sess)
 			print(strftime("%H:%M:%S", gmtime())+" Epoch: %r"%i)
 			
 			if i % 5 == 0:
-				print("Training accuracy: %s" %self.compute_accuracy(x, target, sess))
+				if self.callback is not None:
+					self.callback.store_loss(loss)
+				training_accuracy = self.compute_accuracy(x, target, sess)
+				print("Training accuracy: %s" %training_accuracy)
+				if self.callback is not None:
+					self.callback.store_accuracy_train(training_accuracy)
 				if test_x is not None:
 					current_accuracy = self.compute_accuracy(test_x, test_target, sess)
 					print("Validation accuracy: %s" %current_accuracy)
+					if self.callback is not None:
+						self.callback.store_accuracy_test(current_accuracy)
 					if current_accuracy > self.max_validation_accuracy:
 						self.max_validation_accuracy = current_accuracy
 						save_path = saver.save(sess, save_path)
 						print("Model saved in file: %s" % save_path)
-						with open('accuracy_1.pickle', 'wb') as file:
-							pickle.dump(accuracy, file, protocol=pickle.HIGHEST_PROTOCOL)
+
+		if self.callback is not None:
+			self.callback.save_all(self.callback_path)
 
 	def compute_accuracy(self, x, target, sess):
 		predicted = self.predict(x, sess)
