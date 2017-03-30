@@ -36,7 +36,7 @@ def main(folder=None, n_model=1, nb_epoch=100, save=True, warmstart=False,
 
 import sys
 if __name__ == "__main__":
-	if len(sys.argv) > 1: input_shape=tuple([int(arg) for i, arg in enumerate(sys.argv) if i > 0]) 
+	if len(sys.argv) > 1: input_shape=tuple(None, int(sys.argv[1]), int(sys.argv[2]), int(sys.argv[3])) 
 	else: input_shape= (None, 32, 32, 1)
 	main(n_model=1, folder=1, weights_path="./model3.ckpt", save_path="./model3.ckpt", warmstart=False,
 		input_shape=input_shape)
