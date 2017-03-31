@@ -21,18 +21,19 @@ for i, dir_path in enumerate(dir_paths): # Loop through 1..12 folders
 	for file in files: # Load images
 		img = imread(dir_path + '/' + file)
 
-		# Reshape images so it fits the minimum required by ResNet50
+		# Reshape images so it fits the minimum required by ResNet50#
 		img = imresize(img, (197,197)).astype("float32") 
 		img = preprocess_input(img[np.newaxis])
 		imgs.append(img)
 	batch_tensor = np.vstack(imgs)
-	print("batch:", i, "tensor shape:", batch_tensor.shape)
+	print("batch:", i+1, "tensor shape:", batch_tensor.shape)
 
 	# Get representations
 	out_tensor = model.predict(batch_tensor, batch_size=32)
+	out_tensor = out_tensor.reshape((-1, out_tensor.shape[-1]))
 	print("output shape:", out_tensor.shape)
 
     # Serialize representations
 	h5f = h5py.File(training_directory + 'representations/img_emb_' + str(i+1) + '.h5', 'w')
-	h5f.create_dataset('img_emb_' + str(i+1), data=out_tensor)
+	h5f.create_dataset('img_emb', data=out_tensor)
 	h5f.close()
