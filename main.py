@@ -6,11 +6,11 @@ import tensorflow as tf
 from DSOLFUTR.utils.utils import *
 from DSOLFUTR.utils.settings import training_directory
 
-from DSOLFUTR.models import model1, model2, model3, cnn
+from DSOLFUTR.models import model1, model2, model3, cnn, model1_resnet
 
 def main(folder=None, n_model=1, nb_epoch=100, save=True, warmstart=False, 
-              weights_path="./model1.ckpt", save_path="./model1.ckpt"):
-
+              weights_path="./model1.ckpt", save_path="./model1.ckpt", learning_rate=10e-3):
+	"""
 	data_path = pjoin(training_directory, "word.csv")
 
 	if folder is None:
@@ -30,10 +30,14 @@ def main(folder=None, n_model=1, nb_epoch=100, save=True, warmstart=False,
 			model = model3.hybrid_model()
 		else:
 			raise ValueError
+	"""
+	with tf.Session() as sess:
+		model = model1_resnet.first_head(learning_rate=learning_rate)
 
 		sess.run(tf.global_variables_initializer())
-		model.train(train_file, train_target, sess, nb_epoch, save, warmstart, 
-					weights_path, save_path, test_file, test_target)
+		list_dir = ["/home/alex/Documents/strutured data/projet/train/representations/img_emb_1.h5"]
+		model.train(list_dir, sess, nb_epoch, save, warmstart, 
+					weights_path, save_path)
 
 
 if __name__ == "__main__":

@@ -128,3 +128,13 @@ def visualize(prediction, dict_inverse):
 		outputword = "".join([dico_inverse[i] for i in prediction[word]])
 		output.append(outputword)
 	return output
+
+def create_results_csv(model, train_X, train_target, test_X, test_target, path, sess):
+	prediction1 = model.predict(train_X, sess)
+	prediction2 = model.predict(test_X, sess)
+	data = pd.Dataframe()
+	data["true_word"] = np.hstack((train_target, np.array([""]), test_target))
+	data["true_word"] = np.hstack((prediction1, np.array([""]), prediction2))
+	data.to_csv(path)
+
+	
