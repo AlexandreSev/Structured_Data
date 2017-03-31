@@ -73,45 +73,61 @@ class second_head():
 			  weights_path="./model2.ckpt", save_path="./model2.ckpt", test_x=None, 
 			  test_target=None):
 		
-		print( "%s training pictures"%x.shape[0])
-		print( "%s testing pictures"%test_x.shape[0])
+		#print( "%s training pictures"%x.shape[0])
+		#print( "%s testing pictures"%test_x.shape[0])
 
-		print("Goal on the training set: %s"%np.mean(target == 0))
-		print("Goal on the testing set: %s"%np.mean(test_target == 0))
+		#print("Goal on the training set: %s"%np.mean(target == 0))
+		#print("Goal on the testing set: %s"%np.mean(test_target == 0))
 
-		prediction = self.predict(x, sess)
-		print("Initial accuracy: %s"%np.mean(prediction == np.array(target)))
-
+		#prediction = self.predict(x, sess)
+		#print("Initial accuracy: %s"%np.mean(prediction == np.array(target)))
+		word_file = './DSOLFUTR/data/word.csv'
 		saver = tf.train.Saver()
 
 		if warmstart:
 			saver.restore(sess, weights_path)
 			print("Model Loaded.")
-		
+
 		for i in range(1, nb_epoch + 1):
 
-			loss = self.f_train_step(x, target, sess)
-			print(strftime("%H:%M:%S", gmtime())+" Epoch: %r"%i)
+			word = pd.read_csv(word_file, sep=';', index_col=0)
+			word['batch_nb'] = word['file'].apply(lambda x: int(x.split('/')[1]))
+
+			loss = 0
+			for batch_nb_m_1, representation_file in enumerate(representations_files):
+				# Load pre-calculated representations
+				h5f = h5py.File('./DSOLFUTR/data/representations/' + representation_file,'r')
+				X = h5f['img_emb'][:]
+				h5f.close()
+
+				y = word[word['batch_nb']==batch_nb_m_1 + 1]['tag'].values
+
+				loss += self.f_train_step(X, y, sess)
+		
+		# for i in range(1, nb_epoch + 1):
+
+		# 	loss = self.f_train_step(x, target, sess)
+		# 	print(strftime("%H:%M:%S", gmtime())+" Epoch: %r"%i)
 			
-			if i % 5 == 0:
-				if self.callback is not None:
-					self.callback.store_loss(loss)
-				training_accuracy = self.compute_accuracy(x, target, sess)
-				print("Training accuracy: %s" %training_accuracy)
-				if self.callback is not None:
-					self.callback.store_accuracy_train(training_accuracy)
-				if test_x is not None:
-					current_accuracy = self.compute_accuracy(test_x, test_target, sess)
-					print("Validation accuracy: %s" %current_accuracy)
-					if self.callback is not None:
-						self.callback.store_accuracy_test(current_accuracy)
-					if current_accuracy > self.max_validation_accuracy:
-						self.max_validation_accuracy = current_accuracy
-						save_path = saver.save(sess, save_path)
-						print("Model saved in file: %s" % save_path)
+		# 	if i % 5 == 0:
+		# 		if self.callback is not None:
+		# 			self.callback.store_loss(loss)
+		# 		training_accuracy = self.compute_accuracy(x, target, sess)
+		# 		print("Training accuracy: %s" %training_accuracy)
+		# 		if self.callback is not None:
+		# 			self.callback.store_accuracy_train(training_accuracy)
+		# 		if test_x is not None:
+		# 			current_accuracy = self.compute_accuracy(test_x, test_target, sess)
+		# 			print("Validation accuracy: %s" %current_accuracy)
+		# 			if self.callback is not None:
+		# 				self.callback.store_accuracy_test(current_accuracy)
+		# 			if current_accuracy > self.max_validation_accuracy:
+		# 				self.max_validation_accuracy = current_accuracy
+		# 				save_path = saver.save(sess, save_path)
+		# 				print("Model saved in file: %s" % save_path)
 				
-		if self.callback is not None:
-			self.callback.save_all(self.callback_path)
+		 if self.callback is not None:
+		 	self.callback.save_all(self.callback_path)
 
 
 	def compute_accuracy(self, x, target, sess):
