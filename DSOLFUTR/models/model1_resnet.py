@@ -8,7 +8,7 @@ import pandas as pd
 import os
 from os.path import join as pjoin
 
-from ..utils.settings import training_directory
+from ..utils.settings import training_directory, representations_directory
 from .convolution_part import convolutional_part
 from ..utils.utils import *
 from ..utils.callback import callback as callback_class
@@ -80,7 +80,6 @@ class first_head():
 			feed_dict = {self.input: x, self.target[k]: training_target[:, k, :]}
 			loss_score += (sess.run(tf.reduce_sum(- tf.log(tf.reduce_sum(tf.multiply(self.output[k], self.target[k]), axis=1))), feed_dict=feed_dict))
 			sess.run(self.train_steps[k], feed_dict=feed_dict)
-		print("Loss: %s"%loss_score)
 		return loss_score
 
 	def load_weights(self, weights_path, sess):
@@ -93,6 +92,8 @@ class first_head():
 			  test_target=None):
 
 		word_file = pjoin(training_directory, "word.csv")
+		word = pd.read_csv(word_file, sep=';', index_col=0)
+		word['batch_nb'] = word['file'].apply(lambda x: int(x.split('/')[1]))
 
 		#print( "%s training pictures"%x.shape[0])
 		#print( "%s testing pictures"%test_x.shape[0])
@@ -111,13 +112,10 @@ class first_head():
 		
 		for i in range(1, nb_epoch + 1):
 
-			word = pd.read_csv(word_file, sep=';', index_col=0)
-			word['batch_nb'] = word['file'].apply(lambda x: int(x.split('/')[1]))
-
 			loss = 0
 			for batch_nb_m_1, representation_file in enumerate(representations_files):
 				# Load pre-calculated representations
-				h5f = h5py.File(representation_file,'r')
+				h5f = h5py.File(pjoin(representations_directory, representation_file),'r')
 				X = h5f['img_emb'][:]
 				h5f.close()
 
@@ -125,6 +123,8 @@ class first_head():
 
 				loss += self.f_train_step(X, y, sess)
 
+			print("Loss: %s"%loss)
+		
 			print(strftime("%H:%M:%S", gmtime())+" Epoch: %r"%i)
 			
 			if i % 5000000 == 0:
