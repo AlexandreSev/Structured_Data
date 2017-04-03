@@ -22,7 +22,7 @@ batches_dirs = [pjoin(training_directory, path) for path in os.listdir(training_
 for batch_dir in batches_dirs: # Loop through 1..3000 folders
 	batch_nb = batch_dir.split('/')[-1]
 
-	subbatches_dirs = [pjoin(batch, path) for path in os.listdir(batch) if '.DS_Store' not in path]
+	subbatches_dirs = [pjoin(batch_dir, path) for path in os.listdir(batch_dir) if '.DS_Store' not in path]
 	for subbatch_dir in subbatches_dirs:
 		subbatch_nb = subbatch_dir.split('/')[-1]
 
