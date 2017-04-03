@@ -5,10 +5,11 @@ import numpy as np
 from time import gmtime, strftime
 import pickle
 import pandas as pd
-
+import os
 from os.path import join as pjoin
+import h5py
 
-from .convolution_part import convolutional_part
+from ..utils.settings import training_directory, representations_directory
 from ..utils.ngrams import get_ngrams, get_dict_ngrams
 from ..utils.utils import weight_variable, bias_variable, process_target_model_2
 import h5py
@@ -86,6 +87,7 @@ class second_head():
 
 		#prediction = self.predict(x, sess)
 		#print("Initial accuracy: %s"%np.mean(prediction == np.array(target)))
+
 		word_file = pjoin(training_directory, "word.csv")
 		word = pd.read_csv(word_file, sep=';', index_col=0)
 		word['batch_nb'] = word['file'].apply(lambda x: int(x.split('/')[1]))
@@ -98,7 +100,9 @@ class second_head():
 		for i in range(1, nb_epoch + 1):
 
 			loss = 0
-			for batch_nb_m_1, representation_file in enumerate(train_representations_files):
+			for representation_file in train_representations_files:
+
+				batch_nb_m_1 = int(representation_file.split(".")[0].split("_")[-1])
 				# Load pre-calculated representations
 				h5f = h5py.File(pjoin(representations_directory, representation_file),'r')
 				X = h5f['img_emb'][:]
@@ -107,6 +111,27 @@ class second_head():
 				y = word[word['batch_nb']==batch_nb_m_1 + 1]['tag'].values
 
 				loss += self.f_train_step(X, y, sess)
+
+			print("Loss: %s"%loss)
+
+			print(strftime("%H:%M:%S", gmtime())+" Epoch: %r"%i)
+			
+			if i % 5 == 0:
+				if self.callback is not None:
+					self.callback.store_loss(loss)
+				training_accuracy = self.compute_accuracy(train_representations_files, sess, word)
+				print("Training accuracy: %s" %training_accuracy)
+				if self.callback is not None:
+					self.callback.store_accuracy_train(training_accuracy)
+				if test_representations_files is not None:
+					current_accuracy = self.compute_accuracy(test_representations_files, sess, word)
+					print("Validation accuracy: %s" %current_accuracy)
+					if self.callback is not None:
+						self.callback.store_accuracy_test(current_accuracy)
+					if current_accuracy > self.max_validation_accuracy:
+						self.max_validation_accuracy = current_accuracy
+						save_path = saver.save(sess, save_path)
+						print("Model saved in file: %s" % save_path)
 		
 		# for i in range(1, nb_epoch + 1):
 
@@ -134,9 +159,24 @@ class second_head():
 		 	self.callback.save_all(self.callback_path)
 
 
-	def compute_accuracy(self, x, target, sess):
-		predicted = self.predict(x, sess)
-		return (np.mean(predicted == target))
+	def compute_accuracy(self, representation_files, sess, word):
+		first_step = True
+		for representation_file in representation_files:
+
+				batch_nb_m_1 = int(representation_file.split(".")[0].split("_")[-1])
+				
+				h5f = h5py.File(pjoin(representations_directory, representation_file),'r')
+				if first_step:
+					X = h5f['img_emb'][:]
+				else:
+					X = np.vstack((X, h5f['img_emb'][:]))
+				h5f.close()
+
+				if first_step:
+					y = list(word[word['batch_nb']==batch_nb_m_1]['tag'].values)
+					first_step = False
+				else:
+					y += list(word[word['batch_nb']==batch_nb_m_1]['tag'].values)
 
 if __name__== '__main__':
 	from .settings import training_directory
