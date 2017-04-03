@@ -13,10 +13,6 @@ training_directory = "/mnt/oxford_data/ramdisk/max/90kDICT32px"
 representations_directory = "/mnt/oxford_data/representations"
 targets_directory = "/mnt/oxford_data/targets/"
 
-training_directory = "/Users/antoine/Downloads/mnt/ramdisk/max/90kDICT32px"
-representations_directory = "/Users/antoine/Downloads/mnt/ramdisk/max/representations"
-targets_directory = "/Users/antoine/Downloads/mnt/ramdisk/max/targets"
-
 #training_directory_word = pjoin(training_directory, "word")
 #training_directory_rpz = pjoin(training_directory, "representations")
 
@@ -45,7 +41,6 @@ for batch in batches: # Loop through 1..3000 folders
 			imgs.append(img)
 			target.append(file_name.split('_')[1])
 		batch_tensor = np.vstack(imgs)
-		print('coucou')
 
 		# Get representations
 		out_tensor = model.predict(batch_tensor, batch_size=256)
