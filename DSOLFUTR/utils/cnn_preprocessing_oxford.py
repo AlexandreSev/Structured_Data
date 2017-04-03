@@ -35,7 +35,7 @@ for batch_dir in batches_dirs: # Loop through 1..3000 folders
 		imgs = []
 		target = []
 		for file_name in files: # Load images
-			img = imread(pjoin(subbatch, file_name))
+			img = imread(pjoin(subbatch_dir, file_name))
 
 			# Reshape images so it fits the minimum required by ResNet50#
 			img = imresize(img, (197,197)).astype("float32") 
