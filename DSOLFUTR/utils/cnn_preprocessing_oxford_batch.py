@@ -23,8 +23,7 @@ batches_dirs.sort()
 for batch_dir in batches_dirs: # Loop through 1..3000 folders
 	batch_nb = batch_dir.split('/')[-1]
 	try:
-		if os.path.isfile(pjoin(representations_directory, "img_emb_" + batch_nb + '.h5')) &  \ 
-			os.path.isfile(pjoin(targets_directory, "target_" + batch_nb + '.txt')):
+		if os.path.isfile(pjoin(representations_directory, "img_emb_" + batch_nb + '.h5')) &  os.path.isfile(pjoin(targets_directory, "target_" + batch_nb + '.txt')):
 			continue
 
 		subbatches_dirs = [pjoin(batch_dir, path) for path in os.listdir(batch_dir) if '.DS_Store' not in path]
@@ -70,4 +69,3 @@ for batch_dir in batches_dirs: # Loop through 1..3000 folders
 		print("batch", batch_nb)
 	except:
 		print("Error on batch %s"%batch_nb)
-		
