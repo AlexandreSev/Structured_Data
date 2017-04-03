@@ -17,8 +17,13 @@ model = ResNet50(include_top=False, weights='imagenet', input_shape=(197, 197, 3
 
 dir_paths = [pjoin(training_directory_word, path) for path in os.listdir(training_directory_word)]
 for dir_path in dir_paths: # Loop through 1..12 folders
-	i = dir_path.split("/")[-1]
+	n_batch = dir_path.split("/")[-1]
 	files = [img for img in os.listdir(dir_path) if "reshaped" not in img]
+	files.sort()
+
+	files_int = [int(img.split(".")[0]) for img in files]
+	order_files = np.argsort(files_int)
+	files_sorted = [files[i] for i in order_files]
 	imgs = []
 	for file_name in files: # Load images
 		img = imread(pjoin(dir_path, file_name))
@@ -28,7 +33,7 @@ for dir_path in dir_paths: # Loop through 1..12 folders
 		img = preprocess_input(img[np.newaxis])
 		imgs.append(img)
 	batch_tensor = np.vstack(imgs)
-	print("batch:", i, "tensor shape:", batch_tensor.shape)
+	print("batch:", n_batch, "tensor shape:", batch_tensor.shape)
 
 	# Get representations
 	out_tensor = model.predict(batch_tensor, batch_size=32)
@@ -36,6 +41,6 @@ for dir_path in dir_paths: # Loop through 1..12 folders
 	print("output shape:", out_tensor.shape)
 
     # Serialize representations
-	h5f = h5py.File(pjoin(training_directory_rpz, "img_emb_" + i + '.h5'), 'w')
+	h5f = h5py.File(pjoin(training_directory_rpz, "img_emb_" + n_batch + '.h5'), 'w')
 	h5f.create_dataset('img_emb', data=out_tensor)
 	h5f.close()

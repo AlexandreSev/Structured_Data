@@ -87,9 +87,9 @@ class first_head():
 		saver.restore(sess, weights_path)
 		print("Model Loaded.")
 
-	def train(self, representations_files, sess, nb_epoch=100, save=True, warmstart=False, 
-			  weights_path="./model1.ckpt", save_path="./model1.ckpt", test_x=None, 
-			  test_target=None):
+	def train(self, train_representations_files, sess, nb_epoch=100, save=True, warmstart=False, 
+			  weights_path="./model1_resnet.ckpt", save_path="./model1_resnet.ckpt", 
+			  test_representations_files=None):
 
 		word_file = pjoin(training_directory, "word.csv")
 		word = pd.read_csv(word_file, sep=';', index_col=0)
@@ -113,7 +113,7 @@ class first_head():
 		for i in range(1, nb_epoch + 1):
 
 			loss = 0
-			for batch_nb_m_1, representation_file in enumerate(representations_files):
+			for batch_nb_m_1, representation_file in enumerate(train_representations_files):
 				# Load pre-calculated representations
 				h5f = h5py.File(pjoin(representations_directory, representation_file),'r')
 				X = h5f['img_emb'][:]
@@ -127,15 +127,15 @@ class first_head():
 		
 			print(strftime("%H:%M:%S", gmtime())+" Epoch: %r"%i)
 			
-			if i % 5000000 == 0:
+			if i % 1 == 0:
 				if self.callback is not None:
 					self.callback.store_loss(loss)
-				training_accuracy = self.compute_accuracy(x, target, sess)
+				training_accuracy = self.compute_accuracy(train_representations_files, sess, word)
 				print("Training accuracy: %s" %training_accuracy)
 				if self.callback is not None:
 					self.callback.store_accuracy_train(training_accuracy)
-				if test_x is not None:
-					current_accuracy = self.compute_accuracy(test_x, test_target, sess)
+				if test_representations_files is not None:
+					current_accuracy = self.compute_accuracy(test_representations_files, sess, word)
 					print("Validation accuracy: %s" %current_accuracy)
 					if self.callback is not None:
 						self.callback.store_accuracy_test(current_accuracy)
@@ -147,7 +147,26 @@ class first_head():
 		if self.callback is not None:
 			self.callback.save_all(self.callback_path)
 
-	def compute_accuracy(self, x, target, sess):
-		predicted = self.predict(x, sess)
+	def compute_accuracy(self, representation_files, sess, word):
+		first_step = True
+		for representation_file in representation_files:
+
+				batch_nb_m_1 = int(representation_file.split(".")[0].split("_")[-1])
+				
+				h5f = h5py.File(pjoin(representations_directory, representation_file),'r')
+				if first_step:
+					X = h5f['img_emb'][:]
+				else:
+					X = np.vstack((X, h5f['img_emb'][:]))
+				h5f.close()
+
+				if first_step:
+					y = list(word[word['batch_nb']==batch_nb_m_1]['tag'].values)
+					first_step = False
+				else:
+					y += list(word[word['batch_nb']==batch_nb_m_1]['tag'].values)
+
+		predicted = self.predict(X, sess)
+		target = process_target_model_1(y, self.conversion_dict)
 		return (np.mean(predicted == target))
 		

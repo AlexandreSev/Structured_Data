@@ -37,10 +37,11 @@ def main(folder=None, n_model=1, nb_epoch=100, save=True, warmstart=False,
 
 		sess.run(tf.global_variables_initializer())
 		list_dir = []
-		for i in range(1, 13):
+		for i in range(1, 11):
 			list_dir.append("img_emb_" + str(i) + ".h5")
+		test_dir = ["img_emb_11.h5", "img_emb_12.h5"]
 		model.train(list_dir, sess, nb_epoch, save, warmstart, 
-					weights_path, save_path)
+					weights_path, save_path, test_dir)
 
 import sys
 if __name__ == "__main__":
