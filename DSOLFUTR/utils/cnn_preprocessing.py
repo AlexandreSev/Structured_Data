@@ -9,13 +9,13 @@ import os
 from os.path import join as pjoin
 
 # Execute the script from the models directory
-training_directory = "/home/alex/Documents/strutured data/projet/train"
+training_directory = "/Users/antoine/Dropbox/2016-2017 X/structuredData/Structured_Data/DSOLFUTR/data"
 training_directory_word = pjoin(training_directory, "word")
-training_directory_rpz = "/home/alex/Documents/strutured data/projet/train/representations"
+training_directory_rpz = pjoin(training_directory, "representations")
 
 model = ResNet50(include_top=False, weights='imagenet', input_shape=(197, 197, 3))
 
-dir_paths = [pjoin(training_directory_word, path) for path in os.listdir(training_directory_word)]
+dir_paths = [pjoin(training_directory_word, path) for path in os.listdir(training_directory_word) if '.DS_Store' not in path]
 for dir_path in dir_paths: # Loop through 1..12 folders
 	n_batch = dir_path.split("/")[-1]
 	files = [img for img in os.listdir(dir_path) if "reshaped" not in img]

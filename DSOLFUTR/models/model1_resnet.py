@@ -17,16 +17,19 @@ class first_head():
 
 	
 	def __init__(self, input_shape=(None, 2048), learning_rate=1e-4, callback=True, 
-				 callback_path="./", dropout=0.9):
+				 callback_path="./"):
 
 		self.input = tf.placeholder(tf.float32, shape=input_shape)
 
 		self.conversion_dict = create_conversion_model1()
 
+		self.keep_prob = tf.placeholder(tf.float32)
+		self.dropout = tf.nn.dropout(self.input, self.keep_prob)
+
 		self.W_o = np.array([weight_variable((input_shape[1], 37)) for _ in range(23)])
 		self.b_o = np.array([bias_variable([37]) for _ in range(23)])
 
-		self.output = np.array([tf.nn.softmax(tf.matmul(self.input, self.W_o[k]) + self.b_o[k], 
+		self.output = np.array([tf.nn.softmax(tf.matmul(self.dropout, self.W_o[k]) + self.b_o[k], 
 								dim=-1) for k in range(23)])
 		self.target = np.array([tf.placeholder(tf.float32, shape=(None, 37)) 
 								for k in range(23)])
@@ -43,23 +46,23 @@ class first_head():
 
 	def predict_proba(self, x, sess, all_k=True, onek=0):
 		if not all_k:
-			feed_dict = {self.input: x}
+			feed_dict = {self.input: x, self.keep_prob: 1}
 			return sess.run(self.output[onek], feed_dict=feed_dict)
 		else:
 			predicted = np.zeros((x.shape[0], 23, 37))
 			for k in range(23):
-				feed_dict = {self.input: x}
+				feed_dict = {self.input: x, self.keep_prob: 1}
 				predicted[:, k, :] = sess.run(self.output[k], feed_dict=feed_dict)
 			return predicted
 
 	def predict(self, x, sess, all_k=True, onek=0):
 		if not all_k:
-			feed_dict = {self.input: x}
+			feed_dict = {self.input: x, self.keep_prob: 1}
 			return sess.run(self.output[onek], feed_dict=feed_dict)
 		else:
 			predicted = np.zeros((x.shape[0], 23, 37))
 			for k in range(23):
-				feed_dict = {self.input: x}
+				feed_dict = {self.input: x, self.keep_prob: 1}
 				predicted[:, k, :] = sess.run(self.output[k], feed_dict=feed_dict)
 			return np.argmax(predicted, axis=-1)
 
@@ -76,7 +79,7 @@ class first_head():
 		training_target = one_hot(process_target_model_1(target, self.conversion_dict))
 		loss_score = 0
 		for k in range(23):
-			feed_dict = {self.input: x, self.target[k]: training_target[:, k, :]}
+			feed_dict = {self.input: x, self.keep_prob: .8, self.target[k]: training_target[:, k, :]}
 			loss_score += sess.run(self.true_probas[k], feed_dict=feed_dict)
 			sess.run(self.train_steps[k], feed_dict=feed_dict)
 		return loss_score
