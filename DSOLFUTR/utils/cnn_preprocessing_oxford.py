@@ -47,7 +47,7 @@ for batch_dir in batches_dirs: # Loop through 1..3000 folders
 		# Get representations
 		out_tensor = model.predict(batch_tensor, batch_size=256)
 		out_tensor = out_tensor.reshape((-1, out_tensor.shape[-1]))
-		print("batch", batch, "subbatch", subbatch)
+		print("batch", batch_nb, "subbatch", subbatch_nb)
 
 	    # Serialize representations
 		h5f = h5py.File(pjoin(representations_directory, "img_emb_" + batch_nb + '_' + subbatch_nb + '.h5'), 'w')
