@@ -116,7 +116,7 @@ class second_head():
 
 			print(strftime("%H:%M:%S", gmtime())+" Epoch: %r"%i)
 			
-			if i % 5 == 0:
+			if i % 1 == 0:
 				if self.callback is not None:
 					self.callback.store_loss(loss)
 				training_accuracy = self.compute_accuracy(train_representations_files, sess, word)
@@ -125,6 +125,7 @@ class second_head():
 					self.callback.store_accuracy_train(training_accuracy)
 				if test_representations_files is not None:
 					current_accuracy = self.compute_accuracy(test_representations_files, sess, word)
+					print(current_accuracy)
 					print("Validation accuracy: %s" %current_accuracy)
 					if self.callback is not None:
 						self.callback.store_accuracy_test(current_accuracy)
@@ -177,6 +178,10 @@ class second_head():
 					first_step = False
 				else:
 					y += list(word[word['batch_nb']==batch_nb_m_1]['tag'].values)
+
+		predicted = self.predict(X, sess)
+		target = process_target_model_2(y, self.dict_n_grams)
+		return (np.mean(predicted == target))
 
 if __name__== '__main__':
 	from .settings import training_directory

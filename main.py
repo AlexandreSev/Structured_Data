@@ -6,7 +6,7 @@ import tensorflow as tf
 from DSOLFUTR.utils.utils import *
 from DSOLFUTR.utils.settings import training_directory
 
-from DSOLFUTR.models import model1, model2, model3, cnn, model1_resnet
+from DSOLFUTR.models import model1, model2, model3, cnn, model1_resnet, model2_resnet
 
 def main(folder=None, n_model=1, nb_epoch=100, save=True, warmstart=False, 
          weights_path="./model1.ckpt", save_path="./model1.ckpt", learning_rate=10e-3, 
@@ -33,7 +33,7 @@ def main(folder=None, n_model=1, nb_epoch=100, save=True, warmstart=False,
 			raise ValueError
 	"""
 	with tf.Session() as sess:
-		model = model1_resnet.first_head(learning_rate=learning_rate)
+		model = model2_resnet.second_head(learning_rate=learning_rate)
 
 		sess.run(tf.global_variables_initializer())
 		list_dir = []
