@@ -19,13 +19,15 @@ targets_directory = "/home/antoine/targets/"
 model = ResNet50(include_top=False, weights='imagenet', input_shape=(197, 197, 3))
 
 batches_dirs = [pjoin(training_directory, path) for path in os.listdir(training_directory) if '.txt' not in path and '.DS_Store' not in path]
-#batches_dirs.sort()
+batches_dirs.sort()
 for batch_dir in batches_dirs: # Loop through 1..3000 folders
 	batch_nb = batch_dir.split('/')[-1]
-	print("batch", batch_nb)
 
 	subbatches_dirs = [pjoin(batch_dir, path) for path in os.listdir(batch_dir) if '.DS_Store' not in path]
-	#subbatches_dirs.sort()
+	if not subbatches_dirs:
+		print("batch", batch_nb, "empty")
+		continue	
+	subbatches_dirs.sort()
 
 	imgs = []
 	target = []
@@ -34,6 +36,7 @@ for batch_dir in batches_dirs: # Loop through 1..3000 folders
 
 		files = [img for img in os.listdir(subbatch_dir) if 'jpg' in img and '.DS_Store' not in img]
 		files.sort()
+		if not files: continue
 
 		#files_int = [int(img.split(".")[0]) for img in files]
 		#order_files = np.argsort(files_int)
@@ -60,3 +63,5 @@ for batch_dir in batches_dirs: # Loop through 1..3000 folders
 
 	with open(pjoin(targets_directory, "target_" + batch_nb + '.txt'), "wb") as fp:   #Pickling
 		pickle.dump(target, fp)
+
+	print("batch", batch_nb)
