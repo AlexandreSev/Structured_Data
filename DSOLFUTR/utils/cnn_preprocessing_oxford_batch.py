@@ -22,48 +22,52 @@ batches_dirs = [pjoin(training_directory, path) for path in os.listdir(training_
 batches_dirs.sort()
 for batch_dir in batches_dirs: # Loop through 1..3000 folders
 	batch_nb = batch_dir.split('/')[-1]
-	if os.path.isfile(pjoin(representations_directory, "img_emb_" + batch_nb + '.h5')) &  \ 
-		os.path.isfile(pjoin(targets_directory, "target_" + batch_nb + '.txt')):
-		continue
+	try:
+		if os.path.isfile(pjoin(representations_directory, "img_emb_" + batch_nb + '.h5')) &  \ 
+			os.path.isfile(pjoin(targets_directory, "target_" + batch_nb + '.txt')):
+			continue
 
-	subbatches_dirs = [pjoin(batch_dir, path) for path in os.listdir(batch_dir) if '.DS_Store' not in path]
-	if not subbatches_dirs:
-		print("batch", batch_nb, "empty")
-		continue	
-	subbatches_dirs.sort()
+		subbatches_dirs = [pjoin(batch_dir, path) for path in os.listdir(batch_dir) if '.DS_Store' not in path]
+		if not subbatches_dirs:
+			print("batch", batch_nb, "empty")
+			continue	
+		subbatches_dirs.sort()
 
-	imgs = []
-	target = []
-	for subbatch_dir in subbatches_dirs:
-		subbatch_nb = subbatch_dir.split('/')[-1]
+		imgs = []
+		target = []
+		for subbatch_dir in subbatches_dirs:
+			subbatch_nb = subbatch_dir.split('/')[-1]
 
-		files = [img for img in os.listdir(subbatch_dir) if 'jpg' in img and '.DS_Store' not in img]
-		files.sort()
-		if not files: continue
+			files = [img for img in os.listdir(subbatch_dir) if 'jpg' in img and '.DS_Store' not in img]
+			files.sort()
+			if not files: continue
 
-		#files_int = [int(img.split(".")[0]) for img in files]
-		#order_files = np.argsort(files_int)
-		#files_sorted = [files[i] for i in order_files]
-		for file_name in files: # Load images
-			img = imread(pjoin(subbatch_dir, file_name))
+			#files_int = [int(img.split(".")[0]) for img in files]
+			#order_files = np.argsort(files_int)
+			#files_sorted = [files[i] for i in order_files]
+			for file_name in files: # Load images
+				img = imread(pjoin(subbatch_dir, file_name))
 
-			# Reshape images so it fits the minimum required by ResNet50#
-			img = imresize(img, (197,197)).astype("float32") 
-			img = preprocess_input(img[np.newaxis])
-			imgs.append(img)
-			target.append(file_name.split('_')[1])
-	batch_tensor = np.vstack(imgs)
+				# Reshape images so it fits the minimum required by ResNet50#
+				img = imresize(img, (197,197)).astype("float32") 
+				img = preprocess_input(img[np.newaxis])
+				imgs.append(img)
+				target.append(file_name.split('_')[1])
+		batch_tensor = np.vstack(imgs)
 
-	# Get representations
-	out_tensor = model.predict(batch_tensor, batch_size=256)
-	out_tensor = out_tensor.reshape((-1, out_tensor.shape[-1]))
+		# Get representations
+		out_tensor = model.predict(batch_tensor, batch_size=256)
+		out_tensor = out_tensor.reshape((-1, out_tensor.shape[-1]))
 
-    # Serialize representations
-	h5f = h5py.File(pjoin(representations_directory, "img_emb_" + batch_nb + '.h5'), 'w')
-	h5f.create_dataset('img_emb', data=out_tensor)
-	h5f.close()
+	    # Serialize representations
+		h5f = h5py.File(pjoin(representations_directory, "img_emb_" + batch_nb + '.h5'), 'w')
+		h5f.create_dataset('img_emb', data=out_tensor)
+		h5f.close()
 
-	with open(pjoin(targets_directory, "target_" + batch_nb + '.txt'), "wb") as fp:   #Pickling
-		pickle.dump(target, fp)
+		with open(pjoin(targets_directory, "target_" + batch_nb + '.txt'), "wb") as fp:   #Pickling
+			pickle.dump(target, fp)
 
-	print("batch", batch_nb)
+		print("batch", batch_nb)
+	except:
+		print("Error on batch %s"%batch_nb)
+		
