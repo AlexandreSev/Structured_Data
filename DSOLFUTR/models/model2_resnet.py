@@ -32,10 +32,13 @@ class second_head():
 		
 		self.input = tf.placeholder(tf.float32, shape=input_shape)
 
+		self.keep_prob = tf.placeholder(tf.float32)
+		self.dropout = tf.nn.dropout(self.input, self.keep_prob)
+
 		self.W_o = weight_variable(shape=(input_shape[1], self.output_size))
 		self.b_o = bias_variable(shape=[self.output_size])
 
-		self.output = tf.sigmoid(tf.matmul(self.input, self.W_o) + self.b_o) 
+		self.output = tf.sigmoid(tf.matmul(self.dropout, self.W_o) + self.b_o) 
 
 		self.target = tf.placeholder(tf.float32, shape=(None, self.output_size)) 
 
@@ -50,11 +53,11 @@ class second_head():
 			self.callback = None
 	
 	def predict_proba(self, x, sess):
-		feed_dict = {self.input: x}
+		feed_dict = {self.input: x, self.keep_prob: 1}
 		return sess.run(self.output, feed_dict=feed_dict)
 
 	def predict(self, x, sess, treshold=0.5):
-		feed_dict = {self.input: x}
+		feed_dict = {self.input: x, self.keep_prob: 1}
 		predicted = sess.run(self.output, feed_dict=feed_dict)
 		return (predicted > treshold).astype(np.int)
 
@@ -65,7 +68,7 @@ class second_head():
 
 	def f_train_step(self, x, target, sess):
 		training_target = process_target_model_2(target, self.dict_n_grams)
-		feed_dict = {self.input: x, self.target: training_target}
+		feed_dict = {self.input: x, self.keep_prob: .8, self.target: training_target}
 		loss_score = (sess.run(self.loss, feed_dict=feed_dict))
 		sess.run(self.train_step, feed_dict=feed_dict)
 		return loss_score
