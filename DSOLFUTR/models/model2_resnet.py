@@ -76,7 +76,7 @@ class second_head():
 		print("Model Loaded.")
 
 	def train(self, train_representations_files, sess, nb_epoch=100, save=True, warmstart=False, 
-			  weights_path="./model1_resnet.ckpt", save_path="./model1_resnet.ckpt", 
+			  weights_path="./model2_resnet.ckpt", save_path="./model2_resnet.ckpt", 
 			  test_representations_files=None):
 		
 		#print( "%s training pictures"%x.shape[0])
