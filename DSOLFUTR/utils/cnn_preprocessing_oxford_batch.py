@@ -21,8 +21,8 @@ model = ResNet50(include_top=False, weights='imagenet', input_shape=(197, 197, 3
 batches_dirs = [pjoin(training_directory, path) for path in os.listdir(training_directory) if '.txt' not in path and '.DS_Store' not in path]
 #batches_dirs.sort()
 for batch_dir in batches_dirs: # Loop through 1..3000 folders
-	print("batch", batch_nb)
 	batch_nb = batch_dir.split('/')[-1]
+	print("batch", batch_nb)
 
 	subbatches_dirs = [pjoin(batch_dir, path) for path in os.listdir(batch_dir) if '.DS_Store' not in path]
 	#subbatches_dirs.sort()
