@@ -4,10 +4,16 @@ import tensorflow as tf
 import numpy as np
 from time import gmtime, strftime
 import pickle
+import pandas as pd
+
+from os.path import join as pjoin
 
 from .convolution_part import convolutional_part
 from ..utils.ngrams import get_ngrams, get_dict_ngrams
 from ..utils.utils import weight_variable, bias_variable, process_target_model_2
+import h5py
+
+from ..utils.settings import training_directory, representations_directory
 from ..utils.callback import callback as callback_class
 
 class second_head():
@@ -58,10 +64,9 @@ class second_head():
 
 	def f_train_step(self, x, target, sess):
 		training_target = process_target_model_2(target, self.dict_n_grams)
-		feed_dict = {self.input: x, self.target: target}
+		feed_dict = {self.input: x, self.target: training_target}
 		loss_score = (sess.run(self.loss, feed_dict=feed_dict))
 		sess.run(self.train_step, feed_dict=feed_dict)
-		print("Loss: %s"%loss_score)
 		return loss_score
 
 	def load_weights(self, weights_path, sess):
@@ -69,9 +74,9 @@ class second_head():
 		saver.restore(sess, weights_path)
 		print("Model Loaded.")
 
-	def train(self, x, target, sess, nb_epoch=100, save=True, warmstart=False, 
-			  weights_path="./model2.ckpt", save_path="./model2.ckpt", test_x=None, 
-			  test_target=None):
+	def train(self, train_representations_files, sess, nb_epoch=100, save=True, warmstart=False, 
+			  weights_path="./model1_resnet.ckpt", save_path="./model1_resnet.ckpt", 
+			  test_representations_files=None):
 		
 		#print( "%s training pictures"%x.shape[0])
 		#print( "%s testing pictures"%test_x.shape[0])
@@ -81,22 +86,21 @@ class second_head():
 
 		#prediction = self.predict(x, sess)
 		#print("Initial accuracy: %s"%np.mean(prediction == np.array(target)))
-		word_file = './DSOLFUTR/data/word.csv'
+		word_file = pjoin(training_directory, "word.csv")
+		word = pd.read_csv(word_file, sep=';', index_col=0)
+		word['batch_nb'] = word['file'].apply(lambda x: int(x.split('/')[1]))
 		saver = tf.train.Saver()
 
-		if warmstart:
-			saver.restore(sess, weights_path)
-			print("Model Loaded.")
+		#if warmstart:
+		#	saver.restore(sess, weights_path)
+		#	print("Model Loaded.")
 
 		for i in range(1, nb_epoch + 1):
 
-			word = pd.read_csv(word_file, sep=';', index_col=0)
-			word['batch_nb'] = word['file'].apply(lambda x: int(x.split('/')[1]))
-
 			loss = 0
-			for batch_nb_m_1, representation_file in enumerate(representations_files):
+			for batch_nb_m_1, representation_file in enumerate(train_representations_files):
 				# Load pre-calculated representations
-				h5f = h5py.File('./DSOLFUTR/data/representations/' + representation_file,'r')
+				h5f = h5py.File(pjoin(representations_directory, representation_file),'r')
 				X = h5f['img_emb'][:]
 				h5f.close()
 
@@ -126,7 +130,7 @@ class second_head():
 		# 				save_path = saver.save(sess, save_path)
 		# 				print("Model saved in file: %s" % save_path)
 				
-		 if self.callback is not None:
+		if self.callback is not None:
 		 	self.callback.save_all(self.callback_path)
 
 
