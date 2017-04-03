@@ -1,5 +1,6 @@
 # coding: utf-8
 import os
+from os.path import join as pjoin
 
-training_directory = "/home/alex/Documents/strutured data/projet/train"
-representations_directory = "/home/alex/Documents/strutured data/projet/train/representations"
+training_directory = "/Users/antoine/Dropbox/2016-2017 X/structuredData/Structured_Data/DSOLFUTR/data"
+representations_directory = pjoin(training_directory, 'representations')
