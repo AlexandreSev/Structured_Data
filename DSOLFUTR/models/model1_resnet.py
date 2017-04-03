@@ -9,7 +9,6 @@ import os
 from os.path import join as pjoin
 
 from ..utils.settings import training_directory, representations_directory
-from .convolution_part import convolutional_part
 from ..utils.utils import *
 from ..utils.callback import callback as callback_class
 
@@ -78,7 +77,7 @@ class first_head():
 		loss_score = 0
 		for k in range(23):
 			feed_dict = {self.input: x, self.target[k]: training_target[:, k, :]}
-			loss_score += (sess.run(tf.reduce_sum(- tf.log(tf.reduce_sum(tf.multiply(self.output[k], self.target[k]), axis=1))), feed_dict=feed_dict))
+			loss_score += sess.run(self.true_probas[k], feed_dict=feed_dict)
 			sess.run(self.train_steps[k], feed_dict=feed_dict)
 		return loss_score
 
@@ -113,7 +112,9 @@ class first_head():
 		for i in range(1, nb_epoch + 1):
 
 			loss = 0
-			for batch_nb_m_1, representation_file in enumerate(train_representations_files):
+			for representation_file in train_representations_files:
+
+				batch_nb_m_1 = int(representation_file.split(".")[0].split("_")[-1])
 				# Load pre-calculated representations
 				h5f = h5py.File(pjoin(representations_directory, representation_file),'r')
 				X = h5f['img_emb'][:]
@@ -127,7 +128,7 @@ class first_head():
 		
 			print(strftime("%H:%M:%S", gmtime())+" Epoch: %r"%i)
 			
-			if i % 1 == 0:
+			if i % 5 == 0:
 				if self.callback is not None:
 					self.callback.store_loss(loss)
 				training_accuracy = self.compute_accuracy(train_representations_files, sess, word)
