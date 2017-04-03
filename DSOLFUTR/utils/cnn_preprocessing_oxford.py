@@ -10,8 +10,8 @@ import pickle
 from os.path import join as pjoin
 
 training_directory = "/mnt/oxford_data/ramdisk/max/90kDICT32px"
-representations_directory = "/mnt/oxford_data/representations"
-targets_directory = "/mnt/oxford_data/targets/"
+representations_directory = "/home/antoine/representations"
+targets_directory = "/home/antoine/targets/"
 
 #training_directory_word = pjoin(training_directory, "word")
 #training_directory_rpz = pjoin(training_directory, "representations")
