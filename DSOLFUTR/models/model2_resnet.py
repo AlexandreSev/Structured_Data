@@ -104,16 +104,20 @@ class second_head():
 
 			loss = 0
 			for batch_nb_m in train_representations_files:
-
 				batch_nb_m_1 = str(batch_nb_m)
-				# Load pre-calculated representations
-				h5f = h5py.File(pjoin(ox_directory, "representations", "img_emb_"+ batch_nb_m_1 + ".h5"),'r')
-				X = h5f['img_emb'][:]
-				h5f.close()
+				if os.path.isfile(pjoin(ox_directory, "representations", "img_emb_"+ batch_nb_m_1 + ".h5")):
+					
+					# Load pre-calculated representations
+					h5f = h5py.File(pjoin(ox_directory, "representations", "img_emb_"+ batch_nb_m_1 + ".h5"),'r')
+					X = h5f['img_emb'][:]
+					h5f.close()
 
-				y = pickle.load(open(pjoin(ox_directory, "targets", "target_" + batch_nb_m_1 + ".txt"), "rb"))
+					y = pickle.load(open(pjoin(ox_directory, "targets", "target_" + batch_nb_m_1 + ".txt"), "rb"))
 
-				loss += self.f_train_step(X, y, sess)
+					temp = self.f_train_step(X, y, sess)
+
+					print("Loss of batch %s: %s"%(batch_nb_m, temp))
+					loss += temp
 
 			print("Loss: %s"%loss)
 
@@ -164,27 +168,27 @@ class second_head():
 
 
 	def compute_accuracy(self, representation_files, sess, word):
-		first_step = True
-		for representation_file in representation_files:
-
-				batch_nb_m_1 = int(representation_file.split(".")[0].split("_")[-1])
-				
-				h5f = h5py.File(pjoin(representations_directory, representation_file),'r')
-				if first_step:
+		nb_true = 0
+		nb_total = 0
+		for batch_nb_m in train_representations_files:
+				batch_nb_m_1 = str(batch_nb_m)
+				if os.path.isfile(pjoin(ox_directory, "representations", "img_emb_"+ batch_nb_m_1 + ".h5")):
+					
+					# Load pre-calculated representations
+					h5f = h5py.File(pjoin(ox_directory, "representations", "img_emb_"+ batch_nb_m_1 + ".h5"),'r')
+					
 					X = h5f['img_emb'][:]
-				else:
-					X = np.vstack((X, h5f['img_emb'][:]))
-				h5f.close()
+					h5f.close()
 
-				if first_step:
-					y = list(word[word['batch_nb']==batch_nb_m_1]['tag'].values)
-					first_step = False
-				else:
-					y += list(word[word['batch_nb']==batch_nb_m_1]['tag'].values)
+					y = pickle.load(open(pjoin(ox_directory, "targets", "target_" + batch_nb_m_1 + ".txt"), "rb"))
 
-		predicted = self.predict(X, sess)
-		target = process_target_model_2(y, self.dict_n_grams)
-		return (np.mean(predicted == target))
+					
+					predicted = self.predict(X, sess)
+					target = process_target_model_2(y, self.dict_n_grams)
+
+					nb_true += np.sum(predicted == target)
+					nb_total += len(predicted)
+		return nb_true / nb_total
 
 if __name__== '__main__':
 	from .settings import training_directory
