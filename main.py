@@ -6,7 +6,7 @@ import tensorflow as tf
 from DSOLFUTR.utils.utils import *
 from DSOLFUTR.utils.settings import training_directory
 
-from DSOLFUTR.models import model1, model2, model3, cnn, model1_resnet, model2_resnet
+from DSOLFUTR.models import model1, model2, model3, cnn, model1_resnet, model2_resnet, model_papl
 
 def main(folder=None, n_model=1, nb_epoch=100, save=True, warmstart=False, 
          weights_path="./model1.ckpt", save_path="./model1.ckpt", learning_rate=10e-3, 
@@ -33,13 +33,18 @@ def main(folder=None, n_model=1, nb_epoch=100, save=True, warmstart=False,
 			raise ValueError
 	"""
 	with tf.Session() as sess:
-		model = model2_resnet.second_head(learning_rate=learning_rate)
+		#model = model1_resnet.first_head(learning_rate=learning_rate)
+		model = model_papl.final_head(learning_rate=learning_rate)
 
 		sess.run(tf.global_variables_initializer())
-		list_dir = []
-		for i in range(1, 11):
-			list_dir.append("img_emb_" + str(i) + ".h5")
-		test_dir = ["img_emb_11.h5", "img_emb_12.h5"]
+		
+		# list_dir = []
+		# for i in range(1, 11):
+		# 	list_dir.append("img_emb_" + str(i) + ".h5")
+		# test_dir = ["img_emb_11.h5", "img_emb_12.h5"]
+		
+		list_dir = range(1000, 1601)
+		test_dir = range(1601, 1701)
 		model.train(list_dir, sess, nb_epoch, save, warmstart, 
 					weights_path, save_path, test_dir)
 

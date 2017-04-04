@@ -14,7 +14,7 @@ from ..utils.ngrams import get_ngrams, get_dict_ngrams
 from ..utils.utils import weight_variable, bias_variable, process_target_model_2
 import h5py
 
-from ..utils.settings import training_directory, representations_directory
+from ..utils.settings import training_directory, representations_directory, ox_directory
 from ..utils.callback import callback as callback_class
 
 class second_head():
@@ -103,15 +103,15 @@ class second_head():
 		for i in range(1, nb_epoch + 1):
 
 			loss = 0
-			for representation_file in train_representations_files:
+			for batch_nb_m in train_representations_files:
 
-				batch_nb_m_1 = int(representation_file.split(".")[0].split("_")[-1])
+				batch_nb_m_1 = str(batch_nb_m)
 				# Load pre-calculated representations
-				h5f = h5py.File(pjoin(representations_directory, representation_file),'r')
+				h5f = h5py.File(pjoin(ox_directory, "representations", "img_emb_"+ batch_nb_m_1 + ".h5"),'r')
 				X = h5f['img_emb'][:]
 				h5f.close()
 
-				y = word[word['batch_nb']==batch_nb_m_1 + 1]['tag'].values
+				y = pickle.load(open(pjoin(ox_directory, "targets", "target_" + batch_nb_m_1 + ".txt"), "rb"))
 
 				loss += self.f_train_step(X, y, sess)
 
