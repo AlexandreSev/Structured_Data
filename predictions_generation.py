@@ -1,5 +1,5 @@
 from DSOLFUTR.models.model1_resnet_ox import first_head
-from DSOLFUTR.models.model1_resnet_ox import second_head
+from DSOLFUTR.models.model2 import second_head
 
 model1_weights_path='model1.ckpt'
 model2_weights_path='model2.ckpt'
