@@ -1,6 +1,8 @@
 from DSOLFUTR.models.model1_resnet_ox import first_head
 from DSOLFUTR.models.model2_resnet import second_head
 
+import tensorflow as tf
+
 model1_weights_path='model1.ckpt'
 model2_weights_path='model2.ckpt'
 
