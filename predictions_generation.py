@@ -13,5 +13,3 @@ if __name__ == "__main__":
 
 		model2 = second_head()
 		model2.load_weights(model2_weights_path, sess)
-
-
