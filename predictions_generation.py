@@ -4,7 +4,7 @@ from DSOLFUTR.models.model2_resnet import second_head
 import tensorflow as tf
 
 model1_weights_path='./model1.ckpt'
-model2_weights_path='./model2.ckpt'
+model2_weights_path='./model4.ckpt'
 
 if __name__ == "__main__":
 	with tf.Session() as sess:
