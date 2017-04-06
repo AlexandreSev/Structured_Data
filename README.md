@@ -20,6 +20,8 @@ Before any model, we preprocessed all pictures : we needed to resize all picture
 
 # Demo 
 
+Please, follow the notebook Demonstration.ipynb.
+
 # Sources
 
 - M. Jaderberg, K. Simonyan, A. Vedaldi, and A. Zisserman.  Synthetic data and artificial neural networks for natural scene text recognition. arXiv preprint arXiv :1406.2227, 2014.
