@@ -4,6 +4,9 @@ import numpy as np
 
 
 class callback:
+	"""
+	Class used to store accuracy and loss during training
+	"""
 	
 	def __init__(self):
 		self.loss = []

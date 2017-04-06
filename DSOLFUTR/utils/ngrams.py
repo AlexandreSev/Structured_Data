@@ -8,12 +8,11 @@ from nltk.util import ngrams
 from os.path import join as pjoin
 import unicodedata
 
-#training_directory = "/home/alex/Documents/strutured data/projet/train"
-
-
-#  input = shape(4, 4, 256)
 
 def get_ngrams(word=None):
+    """
+    Get all 3-grams from a word if word is not None, or from all words present in ICDAT
+    """
     if word is None:
         data = pd.read_csv(pjoin(training_directory, "word.csv"), sep=";", encoding="utf8", index_col=0)
         list_tag = data['tag']
@@ -81,12 +80,18 @@ def get_ngrams(word=None):
 
 
 def get_dict_ngrams(list_ngrams):
+    """
+    From the list of all n-grams, compute a dictionary matching a n-gram to its position.
+    """
     response = {}
     for i, char in enumerate(list_ngrams):
         response[char] = i
     return response
 
 def reverse_dict(input_dict):
+    """
+    Inverse a dictionary
+    """
     response = {}
     for key in input_dict:
         response[input_dict[key]] = key
