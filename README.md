@@ -1,5 +1,6 @@
 
 
+
 # Structured_Data
 
 ## Presentation of unconstrained text recognition 
@@ -13,7 +14,8 @@ To solve this unconstrained recognition problem we created a joint model thanks 
 We have implemented three models in order to solve this unconstrained recognition :
 - a character sequence model (model_1)
 - a N grams model (model_2)
-- a joint model
+- a joint model wich is acombination of the two first model thanks to a CRF
+
 Before any model, we preprocessed all pictures : we needed to resize all pictures to the same size. 
 
 # Demo 
