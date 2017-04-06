@@ -1,4 +1,5 @@
 # coding: utf-8
+
 from os.path import join as pjoin
 import pandas as pd
 import numpy as np
@@ -7,6 +8,7 @@ import matplotlib.pyplot as plt
 
 from ..utils.settings import training_directory
 from ..utils.tf_func import *
+
 
 class convolutional_part:
 	"""
@@ -36,6 +38,8 @@ class convolutional_part:
 		self.conv_3 = conv2d(self.maxpool2, self.W_conv3) + self.b_conv3
 		self.output = max_pool_2x2(self.conv_3)
 
+		self.output_shape =  input_shape[1] // 8 * input_shape[2] // 8 * 256
+
 	def predict(self, x, sess):
 		"""
 		Predict the output of the cnn 
@@ -44,4 +48,4 @@ class convolutional_part:
 			sess: tensorflow session
 		"""
 		feed_dict = {self.x: x}
-		return sess.run(self.maxpool3, feed_dict=feed_dict)
+		return sess.run(self.output, feed_dict=feed_dict)

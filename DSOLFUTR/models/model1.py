@@ -33,7 +33,8 @@ class first_model:
 		else:
 			self.cnn = cnn
 
-		flatten_shape = input_shape[1] * input_shape[2] * input_shape[3]
+		flatten_shape = self.cnn.output_shape
+		
 		self.input = tf.reshape(self.cnn.output, [-1, flatten_shape])
 
 		self.keep_prob = tf.placeholder(tf.float32)
@@ -43,7 +44,7 @@ class first_model:
 
 		self.h = tf.nn.relu(tf.matmul(self.input, self.W_h) + self.b_h)	
 
-		self.dropouted_h = tf.nn.dropout(self.h, self.keep_prob)	
+		self.dropouted_h = tf.nn.dropout(self.h, 0.7)	
 
 		self.W_o = np.array([weight_variable((nb_units, 37)) for _ in range(23)])
 		self.b_o = np.array([bias_variable([37]) for _ in range(23)])
@@ -111,12 +112,8 @@ class first_model:
 		self.train_steps = []
 		self.true_probas = []
 		for k in range(23):
-			temp = tf.reduce_sum(- tf.log(tf.reduce_sum(tf.multiply(self.output[k], 
-																	self.target[k]), axis=1)))
-			self.true_probas.append(temp)
-
-			temp = tf.train.AdamOptimizer(learning_rate).minimize(self.true_probas[k])
-			self.train_steps.append(temp)
+			self.true_probas.append(tf.reduce_sum(- tf.log(tf.reduce_sum(tf.multiply(self.output[k], self.target[k]), axis=1))))
+			self.train_steps.append(tf.train.AdamOptimizer(learning_rate).minimize(self.true_probas[k]))
 		
 
 	def f_train_step(self, x, target, sess):
@@ -129,7 +126,7 @@ class first_model:
 		"""
 		loss_score = 0
 		for k in range(23):
-			feed_dict = {self.cnn.x: x, self.target[k]: target[:, k, :], self.keep_prob=0.8}
+			feed_dict = {self.cnn.x: x, self.target[k]: target[:, k, :], self.keep_prob:1.}
 			loss_score += (sess.run(self.true_probas[k], feed_dict=feed_dict))
 			sess.run(self.train_steps[k], feed_dict=feed_dict)
 		print("Loss: %s"%loss_score)
@@ -220,4 +217,3 @@ class first_model:
 		"""
 		predicted = self.predict(x, sess)
 		return (np.mean(predicted == target))
-		

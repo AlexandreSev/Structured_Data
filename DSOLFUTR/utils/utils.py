@@ -140,7 +140,7 @@ def visualize(prediction, dict_inverse):
 	"""
 	output = []
 	for word in range(len(prediction)):
-		outputword = "".join([dico_inverse[i] for i in prediction[word]])
+		outputword = "".join([dict_inverse[i] for i in prediction[word]])
 		output.append(outputword)
 	return output
 	
