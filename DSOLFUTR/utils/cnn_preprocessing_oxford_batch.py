@@ -9,6 +9,14 @@ import os
 import pickle
 from os.path import join as pjoin
 
+'''
+Script to compute Resnet representations on oxford data.
+Goal is to:
+- Load the resnet network
+- Cut the last fully connected layer (aimed at classifying initially)
+- Compute representations
+'''
+
 training_directory = "/mnt/oxford_data/ramdisk/max/90kDICT32px"
 representations_directory = "/home/antoine/representations"
 targets_directory = "/home/antoine/targets/"
@@ -41,9 +49,6 @@ for batch_dir in batches_dirs: # Loop through 1..3000 folders
 			files.sort()
 			if not files: continue
 
-			#files_int = [int(img.split(".")[0]) for img in files]
-			#order_files = np.argsort(files_int)
-			#files_sorted = [files[i] for i in order_files]
 			for file_name in files: # Load images
 				img = imread(pjoin(subbatch_dir, file_name))
 
@@ -63,6 +68,7 @@ for batch_dir in batches_dirs: # Loop through 1..3000 folders
 		h5f.create_dataset('img_emb', data=out_tensor)
 		h5f.close()
 
+		# Serialize targets
 		with open(pjoin(targets_directory, "target_" + batch_nb + '.txt'), "wb") as fp:   #Pickling
 			pickle.dump(target, fp)
 

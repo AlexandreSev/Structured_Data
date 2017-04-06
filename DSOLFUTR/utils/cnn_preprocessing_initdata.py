@@ -8,8 +8,16 @@ import h5py
 import os
 from os.path import join as pjoin
 
+'''
+Script to compute Resnet representations on oxford data.
+Goal is to:
+- Load the resnet network
+- Cut the last fully connected layer (aimed at classifying initially)
+- Compute representations
+'''
+
 # Execute the script from the models directory
-training_directory = "/Users/antoine/Dropbox/2016-2017 X/structuredData/Structured_Data/DSOLFUTR/data"
+training_directory = ""
 training_directory_word = pjoin(training_directory, "word")
 training_directory_rpz = pjoin(training_directory, "representations")
 
