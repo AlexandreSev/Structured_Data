@@ -6,8 +6,11 @@ from skimage.io import imread
 from skimage.color import rgb2grey
 import os
 
-word = pd.read_csv(os.path.join(training_directory, "word.csv"), sep=";", index_col=0)
+"""
+Script to resize all pictures of ICDAR dataset
+"""
 
+word = pd.read_csv(os.path.join(training_directory, "word.csv"), sep=";", index_col=0)
 
 for file in word.file:
 	path_img = os.path.join(training_directory, str(file))

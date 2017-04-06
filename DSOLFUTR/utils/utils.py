@@ -12,17 +12,26 @@ from sklearn.model_selection import train_test_split
 
 
 def get_one_folder(n):
+	"""
+	Load the folder n from the ICDAR dataset
+	"""
 	data = pd.read_csv(pjoin(training_directory, "word.csv"), sep=";", encoding="utf8", index_col=0)
 	return data[data.file.apply(lambda r: (r.split('/')[1] == str(n)))]
 
 
 def create_conversion_model1():
+	"""
+	Create the dictionnay to convert a character into its position in the output of model 1
+	"""
 	dict_conversion = {}
 	for i, char in enumerate("abcdefghijklmnopqrstuvwxyz0123456789_"):
 		dict_conversion[char] = i
 	return dict_conversion
 
 def process_target_model_1(target, dict_conversion):
+	"""
+	Change a list of labels into a list of list of number
+	"""
 	list_target = []
 
 	for tag in target:
@@ -39,7 +48,9 @@ def process_target_model_1(target, dict_conversion):
 	return np.array(list_target)
 
 def process_target_model_2(targets, dict_conversion):
-
+	"""
+	Compute the sparse representation of each target
+	"""
 	list_target = np.zeros((len(targets), len(dict_conversion.keys())))
 
 	for nrow, target in enumerate(targets):
@@ -55,6 +66,9 @@ def process_target_model_2(targets, dict_conversion):
 	return list_target
 
 def process_file_name(file_names, shape=(1, 32, 32, 1)):
+	"""
+	From a list of file_name, load all the pictures in memory
+	"""
 	firststep = True
 	for file_name in file_names:
 		temp_name = file_name.split(".")
@@ -67,7 +81,10 @@ def process_file_name(file_names, shape=(1, 32, 32, 1)):
 	return list_file
 
 def preprocess_data(folder, n_model=1, shape=(1, 32, 32, 1)):
-
+	"""
+	From a folder number (or None for all folders) and the number of the model, return a 
+	training and a testing set
+	"""
 	list_file = process_file_name(folder.file, shape)
 
 	if n_model == 1:
@@ -87,17 +104,15 @@ def preprocess_data(folder, n_model=1, shape=(1, 32, 32, 1)):
 	return train_file, test_file, train_target, test_target 
 
 def one_hot(list_target, n=37):
+	"""
+	return one hot encoding of a label
+	"""
 	return np.array([[np.eye(n)[i] for i in l] for l in list_target])
 
-def weight_variable(shape):
-	initial = tf.truncated_normal(shape, stddev=0.01)
-	return tf.Variable(initial)
-
-def bias_variable(shape):
-	initial = tf.constant(0., shape=shape)
-	return tf.Variable(initial)
-
 def get_score(prediction2, dico_conversion, x):
+	"""
+	Return the score of the string x obtained in the prediction 2 and 0.5 if x is not predicted
+	"""
 	if x in dico_conversion:
 		return prediction2[dico_conversion[x]]
 	else:
@@ -121,20 +136,11 @@ def build_plot(pathnpyfile, Xaxis="Epochs", Yaxis="Loss"):
 
 def visualize(prediction, dict_inverse):
 	"""
-	prediction: is a Npred x 23 arrays
+	Transform results from a list of number to a list of strings
 	"""
 	output = []
 	for word in range(len(prediction)):
 		outputword = "".join([dico_inverse[i] for i in prediction[word]])
 		output.append(outputword)
 	return output
-
-def create_results_csv(model, train_X, train_target, test_X, test_target, path, sess):
-	prediction1 = model.predict(train_X, sess)
-	prediction2 = model.predict(test_X, sess)
-	data = pd.Dataframe()
-	data["true_word"] = np.hstack((train_target, np.array([""]), test_target))
-	data["true_word"] = np.hstack((prediction1, np.array([""]), prediction2))
-	data.to_csv(path)
-
 	

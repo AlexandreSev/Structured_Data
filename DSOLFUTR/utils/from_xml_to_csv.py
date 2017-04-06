@@ -4,7 +4,9 @@ import xml.etree.ElementTree as ET
 from os.path import join as pjoin
 import pandas as pd
 
-
+"""
+Script to transform word.xml into word.csv
+"""
 tree = ET.parse(pjoin(training_directory, 'word.xml'))
 root = tree.getroot()
 

@@ -1,29 +1,17 @@
 # coding: utf-8
-from ..utils.settings import training_directory
 from os.path import join as pjoin
 import pandas as pd
 import numpy as np
 import tensorflow as tf
 import matplotlib.pyplot as plt
 
+from ..utils.settings import training_directory
+from ..utils.tf_func import *
 
-def weight_variable(shape):
-    initial = tf.truncated_normal(shape, stddev=0.1)
-    return tf.Variable(initial)
-
-def bias_variable(shape):
-    initial = tf.constant(0.1, shape=shape)
-    return tf.Variable(initial)
-
-def conv2d(x, W):
-    return tf.nn.conv2d(x, W, strides=[1, 1, 1, 1], padding='SAME')
-
-def max_pool_2x2(x):
-    return tf.nn.max_pool(x, ksize=[1, 2, 2, 1],
-                          strides=[1, 2, 2, 1], padding='SAME')
-#Input
-
-class convolutional_part():
+class convolutional_part:
+	"""
+	Homemade CNN, three convolutions and three maxpoolings
+	"""
 
 	def __init__(self, input_shape=(None, 32, 32, 1)):
 		self.x = tf.placeholder(tf.float32, shape=input_shape, name="input")
@@ -46,20 +34,14 @@ class convolutional_part():
 		self.b_conv3 = bias_variable([256])
 
 		self.conv_3 = conv2d(self.maxpool2, self.W_conv3) + self.b_conv3
-		self.maxpool3 = max_pool_2x2(self.conv_3)
+		self.output = max_pool_2x2(self.conv_3)
 
-	def predict(self, input):
-		with tf.Session() as sess:
-			sess.run(tf.global_variables_initializer())
-			feed_dict = {self.x: input}
-			return sess.run(self.maxpool3, feed_dict=feed_dict)
-
-			
-if __name__ == "__main__":
-	test = np.load(pjoin(training_directory, "test.npy")).reshape(1, 32, 32, 1)
-	model = convolutional_part()
-	print(model.predict(test))
-	
-
-
-
+	def predict(self, x, sess):
+		"""
+		Predict the output of the cnn 
+		parameters:
+			x: input of the cnn
+			sess: tensorflow session
+		"""
+		feed_dict = {self.x: x}
+		return sess.run(self.maxpool3, feed_dict=feed_dict)
