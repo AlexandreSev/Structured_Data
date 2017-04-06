@@ -1,7 +1,26 @@
+
+
+
 # Structured_Data
-Implementation of DEEP STRUCTURED OUTPUT LEARNING  FOR UNCONSTRAINED TEXT RECOGNITION
+
+## Presentation of unconstrained text recognition 
+
+Text and letter recognition is a trending research topic. Applications of neural networks showed high accuracy. We develop a model for unconstrained recognition of words in natural images. It's an unconstrained recognition because there are no fixed lexicon and words have unknown length. 
+
+To solve this unconstrained recognition problem we created a joint model thanks to a Conditional Random Field. This joint model is a combination of a character predictor model and a N-gram predictor model. Moreover we optimised this joint model by back-propagating the structured output loss. We observed better performances with the joint model than with the character sequence model alone.
+
+## Implementation of deep structured output learning for unconstrained text recognition
+
+We have implemented three models in order to solve this unconstrained recognition :
+- a character sequence model (model_1)
+- a N grams model (model_2)
+- a joint model wich is a combination of the two first model thanks to a CRF (model_3)
+
+Before any model, we preprocessed all pictures : we needed to resize all pictures to the same size. Then the two first have been implemented with our own CNN and then with Resnet.
 
 # Demo 
+
+Please, follow the notebook Demonstration.ipynb.
 
 # Sources
 
@@ -17,7 +36,9 @@ Implementation of DEEP STRUCTURED OUTPUT LEARNING  FOR UNCONSTRAINED TEXT RECOGN
 
 For any remark, advice or question, please send us an email at one of the following email addresses:
 
-- finas DOT melanie AT gmail DOT com
-- isnardy DOT a AT gmail DOT com
-- hamid DOT jalalzai AT gmail DOT com
-- sevin DOT alexandre AT gmail DOT com
+<ul>
+<li> finas.melanie@gmail.com </li>
+<li> isnardy.a@gmail.com </li>
+<li> hamid.jalalzai@gmail.com </li>
+<li> sevin.alexandre@gmail.com </li>
+</ul>
