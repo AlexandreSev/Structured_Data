@@ -1,3 +1,4 @@
+
 # Structured_Data
 Implementation of DEEP STRUCTURED OUTPUT LEARNING  FOR UNCONSTRAINED TEXT RECOGNITION
 
@@ -17,7 +18,9 @@ Implementation of DEEP STRUCTURED OUTPUT LEARNING  FOR UNCONSTRAINED TEXT RECOGN
 
 For any remark, advice or question, please send us an email at one of the following email addresses:
 
-- finas DOT melanie AT gmail DOT com
-- isnardy DOT a AT gmail DOT com
-- hamid DOT jalalzai AT gmail DOT com
-- sevin DOT alexandre AT gmail DOT com
+<ul>
+<li> finas DOT melanie AT gmail DOT com </li>
+<li> isnardy DOT a AT gmail DOT com </li>
+<li> hamid DOT jalalzai AT gmail DOT com </li>
+<li> sevin DOT alexandre AT gmail DOT com </li>
+</ul>
