@@ -19,8 +19,8 @@ Implementation of DEEP STRUCTURED OUTPUT LEARNING  FOR UNCONSTRAINED TEXT RECOGN
 For any remark, advice or question, please send us an email at one of the following email addresses:
 
 <ul>
-<li> finas DOT melanie AT gmail DOT com </li>
-<li> isnardy DOT a AT gmail DOT com </li>
-<li> hamid DOT jalalzai AT gmail DOT com </li>
-<li> sevin DOT alexandre AT gmail DOT com </li>
+<li> finas.melanie@gmail.com </li>
+<li> isnardy.a@gmail.com </li>
+<li> hamid.jalalzai@gmail.com </li>
+<li> sevin.alexandre@gmail.com </li>
 </ul>
