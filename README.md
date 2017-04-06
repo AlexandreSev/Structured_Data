@@ -1,6 +1,14 @@
 
 # Structured_Data
-Implementation of DEEP STRUCTURED OUTPUT LEARNING  FOR UNCONSTRAINED TEXT RECOGNITION
+
+## Presentation of unconstrained text recognition 
+
+Text and letter recognition is a trending research topic. Applications of neural networks showed high accuracy. We develop a model for unconstrained recognition of words in natural images. It's an unconstrained recognition because there are no fixed lexicon and words have unknown length. 
+
+To solve this unconstrained recognition problem we created a joint model thanks to a Conditional Random Field. This joint model is a combination of a character predictor model and a N-gram predictor model. Moreover we optimised this joint model by back-propagating the structured output loss. We observed better performances with the joint model than with the character sequence model alone.
+
+## Implementation of DEEP STRUCTURED OUTPUT LEARNING  FOR UNCONSTRAINED TEXT RECOGNITION
+
 
 # Demo 
 
